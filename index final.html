@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content="Flowly — Recupera tu flujo creativo con diagnósticos, recursos y sesiones Pomodoro personalizadas."/>
+<meta name="theme-color" content="#111111"/>
+<title>Flowly — Recupera tu flujo creativo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Rethink+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet"/>
+<style>
+/* ─────────────────────────────────────────────────────────────────
+   FLOWLY · Versión con Design Foundations
+   Tipografía: Rethink Sans
+   Foundations: Sorbet Orange · Zest Green · Red Wine
+   WCAG 2.2 AA · Leyes UX · Ergonomía · Usabilidad
+   ───────────────────────────────────────────────────────────────── */
+
+:root {
+  --ink:       #111111;
+  --ink-soft:  #333333;
+  --muted:     #555555;
+  --hint:      #767676;
+  --border:    #E8E8E8;
+  --border-ui: #B0B0B0;
+  --bg:        #F5F5F3;
+  --bg2:       #EEEEEC;
+  --surface:   #FFFFFF;
+
+  /* ── FOUNDATIONS ── */
+  --warning:        #FFA43B;   /* Sorbet Orange — advertencias, diagnóstico */
+  --warning-soft:   #FFF4E6;   /* fondo suave warning */
+  --warning-border: #FFCF8A;
+  --success:        #60A93E;   /* Zest Green — éxito, completado */
+  --success-soft:   #EDF7E6;   /* fondo suave success */
+  --success-border: #A8D98E;
+  --error:          #852936;   /* Red Wine — errores, peligro */
+  --error-soft:     #F9EAEC;   /* fondo suave error */
+  --error-border:   #C98591;
+
+  /* ── SERENITY BLUE — Accent 10% ── */
+  --serenity:        #C7E1EF;
+  --serenity-deep:   #9BBDD4;
+  --serenity-dark:   #3A7EA0;
+  --serenity-soft:   #EBF5FB;
+
+  /* Legacy compat */
+  --red:       var(--error);
+  --accent:    #111111;
+
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  font-family: 'Rethink Sans', -apple-system, 'Helvetica Neue', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; min-height: 100vh; background: #EBEBEB; display: flex; justify-content: center; align-items: flex-start; padding: 24px 0; }
+::-webkit-scrollbar { display: none; }
+@media (max-width: 430px) { body { padding: 0; background: var(--surface); } }
+
+/* ── SKIP LINK ── */
+.skip-link { position: absolute; top: -100%; left: 8px; background: #0055CC; color: #fff; padding: 12px 20px; font-weight: 700; font-size: 14px; border-radius: 0 0 10px 10px; text-decoration: none; z-index: 9999; transition: top .2s; border: 2px solid #fff; }
+.skip-link:focus { top: 0; outline: 3px solid #fff; outline-offset: 2px; }
+
+/* ── SR-ONLY ── */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+/* ── FOCUS ── */
+:focus { outline: none; }
+:focus-visible { outline: 3px solid #0055CC; outline-offset: 3px; border-radius: 4px; }
+.dark-ctx :focus-visible, .overlay :focus-visible { outline-color: #4DB8FF; }
+
+/* ── MOTION ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+/* ── APP SHELL ── */
+.app { width: 390px; min-height: 844px; background: var(--surface); border-radius: 44px; overflow: hidden; position: relative; border: 1px solid #D8D8D8; box-shadow: 0 24px 80px rgba(0,0,0,.12), 0 4px 16px rgba(0,0,0,.06); display: flex; flex-direction: column; }
+@media (max-width: 430px) { .app { width: 100%; min-height: 100vh; border-radius: 0; box-shadow: none; border: none; } }
+
+/* ── SCREENS ── */
+.screen { display: none; flex-direction: column; min-height: 844px; background: var(--surface); }
+.screen.active { display: flex; }
+.screen.slide-in { animation: slideIn .3s cubic-bezier(.25,.46,.45,.94) both; }
+.screen.slide-out { animation: slideOut .25s ease-in both; }
+@keyframes slideIn { from { opacity: 0; transform: translateX(20px) } to { opacity: 1; transform: translateX(0) } }
+@keyframes slideOut { from { opacity: 1; } to { opacity: 0; } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: translateY(0) } }
+@keyframes scaleIn { from { opacity: 0; transform: scale(.92) } to { opacity: 1; transform: scale(1) } }
+@keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: .5 } }
+@keyframes spin { to { transform: rotate(360deg) } }
+@keyframes bounce { 0%,80%,100% { transform: scale(0) } 40% { transform: scale(1.2) } }
+@keyframes starFall {
+  0%   { opacity:0; transform:translateY(0) translateX(0) rotate(0deg) scale(0.5); }
+  15%  { opacity:1; }
+  85%  { opacity:.8; }
+  100% { opacity:0; transform:translateY(280px) translateX(var(--drift)) rotate(360deg) scale(1.1); }
+}
+@keyframes checkPop {
+  0%   { transform: scale(0) rotate(-10deg); opacity:0; }
+  60%  { transform: scale(1.15) rotate(5deg); }
+  100% { transform: scale(1) rotate(0deg); opacity:1; }
+}
+@keyframes checkPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(155,189,212,.5); }
+  100% { box-shadow: 0 0 0 24px rgba(155,189,212,0); }
+}
+@keyframes shimmer { from { background-position: -200% 0 } to { background-position: 200% 0 } }
+@keyframes popIn { 0% { transform: scale(0) } 60% { transform: scale(1.15) } 100% { transform: scale(1) } }
+
+/* ── STATUS BAR ── */
+.sb { height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 0 28px; flex-shrink: 0; }
+.sb-t { font-size: 15px; font-weight: 600; color: var(--ink); letter-spacing: -.3px; }
+
+/* ── SCROLL AREA ── */
+.scroll { flex: 1; overflow-y: auto; padding: 0 24px 32px; }
+.scroll:focus { outline: none; }
+
+/* ─────── TAB BAR ─────── */
+.tab-bar { height: 80px; display: flex; align-items: flex-start; justify-content: space-around; padding: 8px 4px 0; border-top: 1px solid var(--border); background: rgba(255,255,255,.96); backdrop-filter: blur(20px); flex-shrink: 0; }
+.ti { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; flex: 1; background: none; border: none; font-family: 'Rethink Sans', sans-serif; min-height: 56px; padding: 6px 4px 4px; border-radius: var(--radius-sm); transition: background .15s; }
+.ti:active { background: var(--bg); }
+.ti svg { width: 22px; height: 22px; opacity: .3; color: var(--ink); transition: opacity .2s; }
+.ti.active svg { opacity: 1; }
+.ti-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--ink); opacity: 0; transition: opacity .2s, width .2s; }
+.ti.active .ti-dot { opacity: 1; width: 16px; border-radius: 2px; }
+.ti span { font-size: 10px; color: var(--muted); font-weight: 500; letter-spacing: .2px; display: block; }
+.ti.active span { color: var(--ink); font-weight: 600; }
+
+/* ─────── BUTTONS ─────── */
+.btn-primary { background: var(--ink); color: #fff; border: none; border-radius: var(--radius-lg); padding: 18px 24px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; letter-spacing: -.2px; font-family: 'Rethink Sans', sans-serif; min-height: 56px; transition: opacity .15s, transform .1s; }
+.btn-primary:active { opacity: .85; transform: scale(.99); }
+.btn-outline { background: transparent; color: var(--ink); border: 1.5px solid var(--border-ui); border-radius: var(--radius-lg); padding: 16px 24px; font-size: 16px; font-weight: 500; cursor: pointer; width: 100%; margin-top: 10px; font-family: 'Rethink Sans', sans-serif; min-height: 56px; transition: background .15s; }
+.btn-outline:active { background: var(--bg); }
+.btn-sm { background: var(--ink); color: #fff; border: none; border-radius: var(--radius-sm); padding: 10px 18px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Rethink Sans', sans-serif; min-height: 40px; transition: opacity .15s; }
+.btn-sm:active { opacity: .8; }
+.text-btn { background: none; border: none; font-size: 12px; color: var(--ink); font-weight: 600; cursor: pointer; font-family: 'Rethink Sans', sans-serif; padding: 8px 4px; min-height: 44px; display: inline-flex; align-items: center; }
+.nav-btn { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: var(--bg); border-radius: 50%; border: none; cursor: pointer; font-size: 16px; color: var(--ink); transition: background .15s; }
+.nav-btn:active { background: var(--bg2); }
+.btn-red { background: var(--error); color: #fff; border: none; border-radius: var(--radius-md); padding: 17px; font-size: 16px; font-weight: 600; cursor: pointer; font-family: 'Rethink Sans', sans-serif; width: 100%; min-height: 56px; }
+.btn-ghost { background: var(--bg); color: var(--ink); border: none; border-radius: var(--radius-md); padding: 17px; font-size: 16px; font-weight: 500; cursor: pointer; font-family: 'Rethink Sans', sans-serif; width: 100%; min-height: 56px; }
+.btn-cont { background: var(--ink); color: #fff; border: none; border-radius: var(--radius-lg); padding: 18px; font-size: 16px; font-weight: 600; cursor: not-allowed; width: 100%; opacity: .25; transition: opacity .25s, transform .1s; font-family: 'Rethink Sans', sans-serif; min-height: 56px; }
+.btn-cont.on { opacity: 1; pointer-events: all; cursor: pointer; }
+.btn-cont.on:active { transform: scale(.99); }
+
+/* ─────── NAV ROW ─────── */
+.nav-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 20px 16px; flex-shrink: 0; }
+
+/* ─────── OVERLAY ─────── */
+.overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.45); display: flex; align-items: flex-end; z-index: 100; opacity: 0; pointer-events: none; transition: opacity .25s; }
+.overlay.show { opacity: 1; pointer-events: all; }
+.sheet { background: var(--surface); border-radius: var(--radius-xl) var(--radius-xl) 0 0; padding: 12px 24px 44px; width: 100%; }
+.sheet-handle { width: 36px; height: 4px; background: var(--border-ui); border-radius: 2px; margin: 0 auto 24px; }
+
+/* ─────── CARDS ─────── */
+.card { background: var(--surface); border: 1px solid var(--border-ui); border-radius: var(--radius-md); padding: 18px; }
+.card-dark { background: var(--ink); border-radius: var(--radius-md); padding: 20px; }
+.mini-card { background: var(--bg); border-radius: var(--radius-md); padding: 18px 16px; cursor: pointer; border: 1px solid transparent; text-align: left; font-family: 'Rethink Sans', sans-serif; width: 100%; display: block; transition: border-color .15s, background .15s; }
+.mini-card:hover { border-color: var(--border-ui); }
+.mini-card:active { background: var(--bg2); }
+.test-banner { background: var(--ink); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 14px; cursor: pointer; width: 100%; text-align: left; font-family: 'Rethink Sans', sans-serif; border: none; display: block; transition: opacity .15s; }
+.test-banner:active { opacity: .9; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* ─────── SECTIONS ─────── */
+.sec-label { font-size: 11px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; margin-bottom: 12px; }
+.divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+/* ─────── INSIGHT ─────── */
+.insight-row { background: var(--bg); border-radius: var(--radius-md); padding: 16px 18px; display: flex; align-items: flex-start; gap: 14px; margin-bottom: 10px; }
+.i-icon { width: 36px; height: 36px; background: var(--ink); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; color: #fff; }
+
+/* ─────── PROGRESS ─────── */
+.prog-wrap { background: var(--border-ui); border-radius: 4px; height: 4px; overflow: hidden; }
+.prog-fill { height: 100%; background: var(--serenity-deep); border-radius: 4px; transition: width .4s cubic-bezier(.25,.46,.45,.94); }
+
+/* ─────── TEST ─────── */
+.opt-btn { width: 100%; text-align: left; border-radius: var(--radius-md); padding: 18px 20px; margin-bottom: 10px; cursor: pointer; font-size: 15px; font-family: 'Rethink Sans', sans-serif; background: transparent; color: var(--ink); border: 1.5px solid var(--border-ui); min-height: 56px; transition: all .15s; line-height: 1.4; }
+.opt-btn:hover { border-color: var(--ink); background: var(--bg); }
+.opt-btn.sel { background: var(--serenity-soft); color: var(--serenity-dark); border-color: var(--serenity-deep); font-weight: 700; }
+.opt-btn.sel::before { content: '✓ '; font-weight: 800; }
+
+/* ─────── CHIPS ─────── */
+.chips { display: flex; gap: 8px; overflow-x: auto; padding: 0 24px 20px; flex-shrink: 0; }
+.chip { background: #fff; border: 1.5px solid var(--border); border-radius: 24px; padding: 10px 16px; font-size: 13px; color: var(--ink); white-space: nowrap; cursor: pointer; font-weight: 600; font-family: 'Rethink Sans', sans-serif; flex-shrink: 0; min-height: 44px; transition: all .15s; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+.chip.on { background: linear-gradient(150deg, #C7E1EF 0%, #e8f5fb 45%, #f5fbfe 100%); color: var(--serenity-dark); border-color: var(--serenity-deep); font-weight: 700; box-shadow: 0 2px 8px rgba(155,189,212,.3); }
+
+/* ─────── CHAT ─────── */
+.msgs { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 12px; background: linear-gradient(180deg, var(--serenity-soft) 0%, #fff 100%); }
+.msg { max-width: 80%; }
+.msg.ai { align-self: flex-start; }
+.msg.me { align-self: flex-end; }
+.bubble { padding: 13px 17px; border-radius: 20px; font-size: 15px; line-height: 1.55; }
+.ai .bubble { background: var(--serenity-soft); color: var(--ink); border-bottom-left-radius: 5px; border: 1px solid var(--serenity); }
+.me .bubble { background: var(--ink); color: #fff; border-bottom-right-radius: 5px; }
+.msg-t { font-size: 11px; color: var(--hint); margin-top: 4px; }
+.ai .msg-t { text-align: left; }
+.me .msg-t { text-align: right; }
+.tw { background: var(--serenity-soft); border: 1px solid var(--serenity); padding: 16px 20px; border-radius: 20px; border-bottom-left-radius: 5px; display: flex; gap: 5px; align-items: center; }
+.td { width: 6px; height: 6px; border-radius: 50%; background: var(--serenity-deep); }
+.td:nth-child(1) { animation: bounce 1.2s ease-in-out 0s infinite; }
+.td:nth-child(2) { animation: bounce 1.2s ease-in-out .15s infinite; }
+.td:nth-child(3) { animation: bounce 1.2s ease-in-out .3s infinite; }
+.chat-inp { flex: 1; background: var(--bg); border: 1.5px solid var(--border-ui); border-radius: 24px; padding: 13px 18px; font-size: 15px; color: var(--ink); outline: none; font-family: 'Rethink Sans', sans-serif; transition: border-color .2s; }
+.chat-inp:focus { border-color: var(--serenity-deep); }
+.chat-inp:focus-visible { outline: 3px solid var(--serenity); outline-offset: 2px; border-color: var(--serenity-deep); }
+.chat-inp::placeholder { color: var(--hint); }
+.send-btn { width: 44px; height: 44px; background: var(--serenity-deep); border: none; border-radius: 50%; cursor: pointer; font-size: 18px; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: opacity .15s; }
+.send-btn:active { opacity: .8; }
+
+/* ─────── RESOURCE CARDS ─────── */
+.rcard { border-radius: var(--radius-md); overflow: hidden; position: relative; }
+.rcard-img { width: 100%; display: flex; flex-direction: column; justify-content: flex-end; padding: 14px; }
+.rcard-tag { font-size: 10px; color: rgba(255,255,255,.7); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+.rcard-name { font-size: 14px; color: #fff; font-weight: 600; letter-spacing: -.2px; }
+.fav-btn { position: absolute; top: 6px; right: 6px; width: 44px; height: 44px; background: rgba(0,0,0,.25); border: none; border-radius: 50%; font-size: 16px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); transition: background .15s; }
+.fav-btn.on { background: rgba(0,0,0,.5); }
+
+/* ─────── EXERCISE CARDS ─────── */
+.ex-card { border: 1px solid var(--border-ui); border-radius: var(--radius-md); padding: 16px; display: flex; align-items: flex-start; gap: 14px; margin-bottom: 10px; transition: border-color .15s; background:#fff; box-shadow: 0 1px 4px rgba(0,0,0,.05); }
+.ex-card:hover { border-color: var(--ink); }
+.ex-icon { width: 40px; height: 40px; background: var(--ink); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff; flex-shrink: 0; }
+
+/* ─────── SESSIONS ─────── */
+.stat-card { background: var(--ink); border-radius: var(--radius-md); padding: 20px; margin-bottom: 14px; }
+.bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 48px; margin-top: 14px; }
+.bar { flex: 1; background: rgba(255,255,255,.2); border-radius: 3px; transition: height .4s cubic-bezier(.25,.46,.45,.94); }
+.bar.active { background: var(--serenity); }
+.session-item { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; margin-bottom: 10px; }
+.next-session { border: 1.5px solid var(--border-ui); border-radius: var(--radius-md); padding: 18px; margin-bottom: 14px; }
+
+/* ─────── PROFILE ─────── */
+.profile-stat { background: var(--bg); border-radius: var(--radius-sm); padding: 14px 10px; text-align: center; flex: 1; }
+.badge-row { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px 16px; display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+.badge-icon { width: 36px; height: 36px; background: var(--ink); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #fff; flex-shrink: 0; }
+
+/* ─────── UNDO / TOAST ─────── */
+.toast { position: absolute; bottom: 96px; left: 16px; right: 16px; background: var(--ink); color: #fff; border-radius: var(--radius-md); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; z-index: 50; opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity .25s, transform .25s; }
+.toast.show { opacity: 1; transform: translateY(0); pointer-events: all; }
+.toast-undo { background: rgba(255,255,255,.15); border: none; border-radius: 8px; color: #fff; padding: 6px 14px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Rethink Sans', sans-serif; min-height: 36px; }
+
+/* ─────── FOCUS TIMER ─────── */
+.focus-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 24px 16px; }
+.cyc-dot { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--border-ui); background: transparent; transition: all .3s; }
+.cyc-dot.done { background: var(--serenity-deep); border-color: var(--serenity-deep); }
+.cyc-dot.cur { border-color: var(--serenity-deep); box-shadow: 0 0 0 3px rgba(155,189,212,.25); }
+.ctrl { width: 52px; height: 52px; border-radius: 50%; border: 1.5px solid var(--border-ui); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--ink); transition: background .15s; }
+.ctrl:active { background: var(--bg); }
+.ctrl-play { width: 72px; height: 72px; background: var(--ink); border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #fff; box-shadow: 0 4px 20px rgba(17,17,17,.25); transition: transform .1s, box-shadow .15s; }
+.ctrl-play:active { transform: scale(.95); box-shadow: 0 2px 10px rgba(17,17,17,.2); }
+
+/* ─────── ONBOARDING ─────── */
+.ob-slides-wrap { flex: 1; overflow: hidden; position: relative; }
+.ob-slides { display: flex; transition: transform .4s cubic-bezier(.25,.46,.45,.94); height: 100%; }
+.ob-slide { flex: 0 0 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 36px; text-align: center; }
+.ob-dots { display: flex; gap: 6px; align-items: center; justify-content: center; padding: 16px; flex-shrink: 0; }
+.ob-dot { width: 6px; height: 6px; border-radius: 3px; background: var(--border-ui); transition: all .3s; cursor: pointer; border: none; }
+.ob-dot.active { width: 20px; background: var(--ink); }
+.ob-illus { width: 180px; height: 180px; margin-bottom: 32px; display: flex; align-items: center; justify-content: center; }
+
+/* ─────── ONBOARDING INPUT STEP ─────── */
+.ob-input { width: 100%; background: var(--bg); border: 2px solid var(--border-ui); border-radius: var(--radius-md); padding: 18px 20px; font-size: 18px; font-family: 'Rethink Sans', sans-serif; color: var(--ink); outline: none; transition: border-color .2s; text-align: center; letter-spacing: -.3px; }
+.ob-input:focus { border-color: var(--ink); }
+.ob-input:focus-visible { outline: 3px solid #0055CC; outline-offset: 2px; border-color: var(--ink); }
+.ob-input::placeholder { color: var(--hint); }
+
+/* ─────── PROFILE GRID ─────── */
+.profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 24px 0; }
+.profile-opt { border: 1.5px solid var(--border-ui); border-radius: var(--radius-md); padding: 18px 14px; cursor: pointer; font-family: 'Rethink Sans', sans-serif; background: var(--surface); text-align: center; transition: all .15s; }
+.profile-opt.sel { border-color: var(--ink); background: var(--ink); color: #fff; }
+.profile-opt .po-icon { font-size: 28px; display: block; margin-bottom: 8px; }
+.profile-opt .po-label { font-size: 13px; font-weight: 600; color: var(--ink); display: block; }
+.profile-opt.sel .po-label { color: #fff; }
+
+/* ─────── CHALLENGE CHIPS ─────── */
+.chal-chip { border: 1.5px solid var(--border-ui); border-radius: 24px; padding: 11px 18px; font-size: 14px; color: var(--muted); cursor: pointer; font-weight: 500; font-family: 'Rethink Sans', sans-serif; transition: all .15s; background: var(--surface); min-height: 44px; }
+.chal-chip.sel { border-color: var(--ink); background: var(--ink); color: #fff; }
+.chal-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0; }
+
+/* ─────── READY SCREEN ─────── */
+.ready-check { width: 80px; height: 80px; background: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; animation: popIn .5s cubic-bezier(.175,.885,.32,1.275) both; }
+.confetti-dot { position: absolute; width: 8px; height: 8px; border-radius: 50%; animation: confettiFall 1s ease-out both; }
+@keyframes confettiFall { from { opacity: 1; transform: translateY(0) rotate(0deg); } to { opacity: 0; transform: translateY(80px) rotate(360deg); } }
+
+/* ─────── STREAK BADGE ─────── */
+.streak-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--warning-soft); border: 1px solid var(--warning-border); border-radius: 24px; padding: 8px 14px; font-size: 13px; color: #8B5000; font-weight: 600; margin-bottom: 24px; }
+.streak-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); }
+
+/* ─────── SPLASH ─────── */
+.splash-logo { font-size: 54px; font-weight: 800; color: var(--ink); letter-spacing: -2.5px; animation: fadeUp .6s .2s both; }
+.splash-sub { font-size: 15px; color: var(--muted); margin-top: 8px; animation: fadeUp .6s .4s both; }
+.splash-loader { width: 32px; height: 32px; border: 2.5px solid var(--border); border-top-color: var(--ink); border-radius: 50%; animation: spin .8s linear infinite; margin: 40px auto 0; }
+
+/* ─────── STEP HEADER ─────── */
+.step-hd { padding: 20px 28px 0; flex-shrink: 0; }
+.step-num { font-size: 11px; color: var(--hint); font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+.step-prog { display: flex; gap: 4px; margin-bottom: 32px; }
+.step-seg { height: 3px; flex: 1; border-radius: 2px; background: var(--border); transition: background .3s; }
+.step-seg.done { background: var(--serenity-deep); }
+
+/* ─────── SKELETON LOADER ─────── */
+.skel { background: linear-gradient(90deg, var(--bg) 25%, var(--bg2) 50%, var(--bg) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: var(--radius-sm); }
+
+/* ─────── FOUNDATIONS TOKENS ─────── */
+.warning-banner { background: var(--warning-soft); border: 1px solid var(--warning-border); border-radius: var(--radius-md); padding: 14px 16px; display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+.warning-icon { width: 32px; height: 32px; background: var(--warning); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #fff; flex-shrink: 0; }
+.success-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--success-soft); border: 1px solid var(--success-border); color: #2d5c18; border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 600; }
+.error-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--error-soft); border: 1px solid var(--error-border); color: var(--error); border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 600; }
+
+/* ─────── TYPOGRAPHY RETHINK SANS ─────── */
+h1, h2, h3 { font-family: 'Rethink Sans', sans-serif; }
+.splash-logo { font-family: 'Rethink Sans', sans-serif; }
+
+</style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+<div id="sr-announcer" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+<div class="app">
+
+<!-- ═══════════════════════════════════════
+     SPLASH
+════════════════════════════════════════ -->
+<div class="screen active" id="screen-splash" style="background:#fff;flex-direction:column;align-items:center;justify-content:center;padding:48px 32px;gap:72px;text-align:center;">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:28px;">
+    <div style="font-family:'Rethink Sans',sans-serif;font-size:52px;font-weight:800;color:var(--ink);letter-spacing:-2px;line-height:1;">Flowly</div>
+    <div style="width:120px;height:120px;background:#f4eef8;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+      <span style="font-size:58px;line-height:1;" role="img" aria-label="cerebro">🧠</span>
+    </div>
+  </div>
+  <div style="width:100%;">
+    <div style="font-size:11px;color:var(--hint);letter-spacing:2.5px;text-transform:uppercase;font-weight:700;margin-bottom:14px;">Tu espacio creativo</div>
+    <div style="font-size:34px;font-weight:800;color:var(--ink);letter-spacing:-1.2px;line-height:1.15;margin-bottom:36px;">Cuando las ideas<br>dejan de fluir.</div>
+    <div class="splash-loader" role="status" aria-label="Cargando"></div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     SLIDES DE ONBOARDING
+════════════════════════════════════════ -->
+<div class="screen" id="screen-slides">
+  <div class="sb" aria-hidden="true">
+    <span></span>
+    <button class="text-btn" style="color:var(--hint);font-weight:500;" onclick="goTo('ob-name')" aria-label="Saltar presentación">Saltar</button>
+  </div>
+
+  <div class="ob-slides-wrap" aria-live="polite" aria-atomic="true">
+    <div class="ob-slides" id="ob-track">
+
+      <!-- Slide 1 -->
+      <div class="ob-slide" role="group" aria-label="Slide 1 de 3">
+        <div class="ob-illus" aria-hidden="true">
+          <svg width="160" height="160" viewBox="0 0 160 160" fill="none">
+            <circle cx="80" cy="80" r="70" fill="#F0F0EE"/>
+            <circle cx="80" cy="80" r="40" fill="#111"/>
+            <path d="M60 80 Q70 60 80 80 Q90 100 100 80" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <circle cx="56" cy="56" r="6" fill="#111" opacity=".12"/>
+            <circle cx="108" cy="56" r="4" fill="#111" opacity=".08"/>
+            <circle cx="56" cy="108" r="4" fill="#111" opacity=".08"/>
+            <circle cx="108" cy="108" r="6" fill="#111" opacity=".12"/>
+            <rect x="68" y="108" width="24" height="3" rx="1.5" fill="#111" opacity=".15"/>
+            <rect x="72" y="115" width="16" height="3" rx="1.5" fill="#111" opacity=".1"/>
+          </svg>
+        </div>
+        <p style="font-size:11px;color:var(--serenity-dark);letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:14px;">Diagnóstico</p>
+        <h2 style="font-size:28px;font-weight:800;color:var(--ink);letter-spacing:-1px;line-height:1.15;margin-bottom:14px;">Entiende tu bloqueo creativo</h2>
+        <p style="font-size:16px;color:var(--muted);line-height:1.65;">Un test de 6 preguntas identifica exactamente qué frena tu creatividad y por qué.</p>
+      </div>
+
+      <!-- Slide 2 -->
+      <div class="ob-slide" role="group" aria-label="Slide 2 de 3">
+        <div class="ob-illus" aria-hidden="true">
+          <svg width="160" height="160" viewBox="0 0 160 160" fill="none">
+            <rect x="20" y="20" width="52" height="52" rx="14" fill="#111"/>
+            <rect x="88" y="20" width="52" height="52" rx="14" fill="#F0F0EE"/>
+            <rect x="20" y="88" width="52" height="52" rx="14" fill="#F0F0EE"/>
+            <rect x="88" y="88" width="52" height="52" rx="14" fill="#111"/>
+            <rect x="34" y="42" width="24" height="3" rx="1.5" fill="#fff"/>
+            <rect x="34" y="50" width="16" height="3" rx="1.5" fill="rgba(255,255,255,.4)"/>
+            <rect x="102" y="42" width="24" height="3" rx="1.5" fill="#111" opacity=".4"/>
+            <rect x="102" y="50" width="16" height="3" rx="1.5" fill="#111" opacity=".2"/>
+            <rect x="34" y="110" width="24" height="3" rx="1.5" fill="#111" opacity=".4"/>
+            <rect x="34" y="118" width="16" height="3" rx="1.5" fill="#111" opacity=".2"/>
+            <rect x="102" y="110" width="24" height="3" rx="1.5" fill="#fff"/>
+            <rect x="102" y="118" width="16" height="3" rx="1.5" fill="rgba(255,255,255,.4)"/>
+          </svg>
+        </div>
+        <p style="font-size:11px;color:var(--serenity-dark);letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:14px;">Inspiración</p>
+        <h2 style="font-size:28px;font-weight:800;color:var(--ink);letter-spacing:-1px;line-height:1.15;margin-bottom:14px;">Recursos para cuando nada fluye</h2>
+        <p style="font-size:16px;color:var(--muted);line-height:1.65;">Moodboards, ejercicios creativos y técnicas curadas según tu tipo de bloqueo.</p>
+      </div>
+
+      <!-- Slide 3 -->
+      <div class="ob-slide" role="group" aria-label="Slide 3 de 3">
+        <div class="ob-illus" aria-hidden="true">
+          <svg width="160" height="160" viewBox="0 0 160 160" fill="none">
+            <circle cx="80" cy="80" r="60" stroke="#EBEBEB" stroke-width="8"/>
+            <circle cx="80" cy="80" r="60" stroke="#111" stroke-width="8" stroke-linecap="round" stroke-dasharray="377" stroke-dashoffset="94" transform="rotate(-90 80 80)"/>
+            <circle cx="80" cy="80" r="44" fill="#F8F8F6"/>
+            <text x="80" y="76" text-anchor="middle" font-size="20" font-weight="700" fill="#111" font-family="-apple-system,sans-serif">25:00</text>
+            <text x="80" y="92" text-anchor="middle" font-size="11" fill="#767676" font-family="-apple-system,sans-serif">minutos</text>
+            <circle cx="80" cy="130" r="6" fill="#111"/>
+            <circle cx="60" cy="128" r="4" fill="#EBEBEB"/>
+            <circle cx="100" cy="128" r="4" fill="#EBEBEB"/>
+          </svg>
+        </div>
+        <p style="font-size:11px;color:var(--serenity-dark);letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:14px;">Enfoque</p>
+        <h2 style="font-size:28px;font-weight:700;color:var(--ink);letter-spacing:-1px;line-height:1.15;margin-bottom:14px;">Sesiones Pomodoro para crear más</h2>
+        <p style="font-size:16px;color:var(--muted);line-height:1.65;">Bloques de trabajo y descanso que reducen la autocrítica y disparan la productividad.</p>
+      </div>
+
+    </div><!-- /ob-slides -->
+  </div>
+
+  <div class="ob-dots" role="tablist" aria-label="Progreso de presentación">
+    <button class="ob-dot active" role="tab" aria-selected="true"  aria-label="Slide 1" onclick="goSlide(0)"></button>
+    <button class="ob-dot"        role="tab" aria-selected="false" aria-label="Slide 2" onclick="goSlide(1)"></button>
+    <button class="ob-dot"        role="tab" aria-selected="false" aria-label="Slide 3" onclick="goSlide(2)"></button>
+  </div>
+
+  <div style="padding:0 24px 40px;flex-shrink:0;">
+    <button class="btn-primary" id="ob-next-btn" onclick="obNext()">Siguiente</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     PASO 1 — NOMBRE
+════════════════════════════════════════ -->
+<div class="screen" id="screen-ob-name">
+  <div class="sb" aria-hidden="true"><span></span></div>
+  <div class="step-hd">
+    <div class="step-num">Paso 1 de 3</div>
+    <div class="step-prog">
+      <div class="step-seg done"></div>
+      <div class="step-seg"></div>
+      <div class="step-seg"></div>
+    </div>
+  </div>
+  <main id="ob-name-content" style="flex:1;display:flex;flex-direction:column;padding:0 28px 40px;">
+    <div style="font-size:32px;margin-bottom:16px;" aria-hidden="true">👋</div>
+    <h1 tabindex="-1" style="font-size:30px;font-weight:700;color:var(--ink);letter-spacing:-1px;line-height:1.15;margin-bottom:10px;">¿Cómo te llamas?</h1>
+    <p style="font-size:15px;color:var(--muted);line-height:1.6;margin-bottom:40px;">Así puedo llamarte cuando lo necesites.</p>
+    <label for="inp-name" class="sr-only">Tu nombre</label>
+    <input class="ob-input" id="inp-name"
+      type="text"
+      placeholder="Tu nombre"
+      autocomplete="given-name"
+      maxlength="30"
+      oninput="checkName()"
+      aria-describedby="name-hint"/>
+    <p id="name-hint" style="font-size:12px;color:var(--hint);text-align:center;margin-top:10px;">Solo tu nombre, sin apellidos.</p>
+    <div style="flex:1;"></div>
+    <button class="btn-primary" id="btn-name" onclick="if(this.getAttribute('aria-disabled')==='true')return;goTo('ob-profile')" style="opacity:.2;" aria-disabled="true">Continuar</button>
+  </main>
+</div>
+
+<!-- ═══════════════════════════════════════
+     PASO 2 — PERFIL CREATIVO
+════════════════════════════════════════ -->
+<div class="screen" id="screen-ob-profile">
+  <div class="sb" aria-hidden="true"><span></span></div>
+  <div class="step-hd">
+    <div class="step-num">Paso 2 de 3</div>
+    <div class="step-prog">
+      <div class="step-seg done"></div>
+      <div class="step-seg done"></div>
+      <div class="step-seg"></div>
+    </div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:0 28px 40px;">
+    <h2 tabindex="-1" style="font-size:28px;font-weight:700;color:var(--ink);letter-spacing:-.8px;line-height:1.2;margin-bottom:10px;">¿Cuál es tu perfil creativo?</h2>
+    <p style="font-size:15px;color:var(--muted);line-height:1.6;margin-bottom:4px;">Personalizaré tus recursos según tu disciplina.</p>
+    <div class="profile-grid" role="group" aria-label="Selecciona tu perfil creativo">
+      <button class="profile-opt" onclick="selProfile(this)" aria-pressed="false" type="button">
+        <span class="po-icon" aria-hidden="true">🎨</span>
+        <span class="po-label">Diseñador/a</span>
+      </button>
+      <button class="profile-opt" onclick="selProfile(this)" aria-pressed="false" type="button">
+        <span class="po-icon" aria-hidden="true">✍️</span>
+        <span class="po-label">Escritor/a</span>
+      </button>
+      <button class="profile-opt" onclick="selProfile(this)" aria-pressed="false" type="button">
+        <span class="po-icon" aria-hidden="true">🎵</span>
+        <span class="po-label">Músico/a</span>
+      </button>
+      <button class="profile-opt" onclick="selProfile(this)" aria-pressed="false" type="button">
+        <span class="po-icon" aria-hidden="true">📷</span>
+        <span class="po-label">Fotógrafo/a</span>
+      </button>
+      <button class="profile-opt" onclick="selProfile(this)" aria-pressed="false" type="button">
+        <span class="po-icon" aria-hidden="true">🎬</span>
+        <span class="po-label">Cineasta</span>
+      </button>
+      <button class="profile-opt" onclick="selProfile(this)" aria-pressed="false" type="button">
+        <span class="po-icon" aria-hidden="true">💻</span>
+        <span class="po-label">Desarrollador/a</span>
+      </button>
+    </div>
+    <button class="btn-primary" id="btn-profile" onclick="if(this.getAttribute('aria-disabled')==='true')return;goTo('ob-challenge')" style="opacity:.2;" aria-disabled="true">Continuar</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     PASO 3 — DESAFÍOS
+════════════════════════════════════════ -->
+<div class="screen" id="screen-ob-challenge">
+  <div class="sb" aria-hidden="true"><span></span></div>
+  <div class="step-hd">
+    <div class="step-num">Paso 3 de 3</div>
+    <div class="step-prog">
+      <div class="step-seg done"></div>
+      <div class="step-seg done"></div>
+      <div class="step-seg done"></div>
+    </div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:0 28px 40px;">
+    <h2 tabindex="-1" style="font-size:28px;font-weight:700;color:var(--ink);letter-spacing:-.8px;line-height:1.2;margin-bottom:10px;">¿Qué te frena más seguido?</h2>
+    <p style="font-size:15px;color:var(--muted);line-height:1.6;margin-bottom:4px;">Elige uno o más. Sin filtros.</p>
+    <div class="chal-chips" role="group" aria-label="Selecciona tus principales desafíos creativos">
+      <button class="chal-chip" onclick="selChallenge(this)" aria-pressed="false" type="button">Procrastinación</button>
+      <button class="chal-chip" onclick="selChallenge(this)" aria-pressed="false" type="button">Perfeccionismo</button>
+      <button class="chal-chip" onclick="selChallenge(this)" aria-pressed="false" type="button">Bloqueo de ideas</button>
+      <button class="chal-chip" onclick="selChallenge(this)" aria-pressed="false" type="button">Falta de motivación</button>
+      <button class="chal-chip" onclick="selChallenge(this)" aria-pressed="false" type="button">Autocrítica excesiva</button>
+      <button class="chal-chip" onclick="selChallenge(this)" aria-pressed="false" type="button">Falta de tiempo</button>
+      <button class="chal-chip" onclick="selChallenge(this)" aria-pressed="false" type="button">Fatiga creativa</button>
+      <button class="chal-chip" onclick="selChallenge(this)" aria-pressed="false" type="button">Comparación constante</button>
+    </div>
+    <button class="btn-primary" id="btn-chal" onclick="if(this.getAttribute('aria-disabled')==='true')return;goTo('ob-ready')" style="opacity:.2;" aria-disabled="true">Ver mi plan personalizado</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     TODO LISTO
+════════════════════════════════════════ -->
+<div class="screen" id="screen-ob-ready" style="align-items:center;justify-content:center;text-align:center;">
+  <div style="padding:0 36px 60px;position:relative;">
+    <div id="ready-confetti" style="position:relative;display:inline-block;margin-bottom:24px;">
+      <div class="ready-check" aria-hidden="true">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+    </div>
+    <h2 id="ready-title" tabindex="-1" style="font-size:30px;font-weight:700;color:var(--ink);letter-spacing:-.8px;line-height:1.2;margin-bottom:12px;">¡Todo listo!</h2>
+    <p id="ready-sub" style="font-size:16px;color:var(--muted);line-height:1.65;margin-bottom:48px;">Tu espacio personalizado está listo. Empieza cuando quieras.</p>
+    <button class="btn-primary" onclick="finishOnboarding()">Entrar a Flowly</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     HOME
+════════════════════════════════════════ -->
+<div class="screen" id="screen-home">
+  <div class="sb" aria-hidden="true"><span class="sb-t">9:41</span><span style="font-size:13px;color:var(--ink);">●●●</span></div>
+  <main class="scroll" id="main-content" tabindex="-1" aria-label="Contenido principal">
+    <p style="font-size:13px;color:var(--swan);opacity:.5;font-weight:600;margin-bottom:4px;" id="home-greeting">Buenos días</p>
+    <h1 tabindex="-1" id="home-title" style="font-size:28px;font-weight:800;color:var(--ink);letter-spacing:-.8px;line-height:1.2;margin-bottom:14px;">¿Listo para<br>crear hoy?</h1>
+    <div class="streak-badge" aria-label="Racha activa: 3 días consecutivos">
+      <span aria-hidden="true" style="font-size:12px;">●</span>
+      3 días de racha activa
+    </div>
+
+    <p class="sec-label" style="color:var(--swan);opacity:.4;">Acceso rápido</p>
+    <div class="grid2" style="margin-bottom:16px;">
+      <button class="mini-card" onclick="goTo('focus')" type="button" style="background:linear-gradient(150deg,#2a2a2a 0%,#1f1f1f 100%);border-color:#111;">
+        <div style="width:36px;height:36px;background:rgba(255,255,255,.12);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:10px;flex-shrink:0;" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
+        </div>
+        <div style="font-size:14px;font-weight:700;color:#fff;">Pomodoro</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:3px;font-weight:500;">Empieza tu sesión de enfoque</div>
+      </button>
+      <button class="mini-card" onclick="goTo('chat')" type="button" style="background:linear-gradient(150deg,#C7E1EF 0%,#daeef8 60%,#eef8fd 100%);border-color:var(--serenity-deep);">
+        <div style="width:36px;height:36px;background:linear-gradient(135deg,#C7E1EF,var(--serenity-deep));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--serenity-dark);box-shadow:0 2px 10px rgba(155,189,212,.35);margin-bottom:10px;" aria-hidden="true">✦</div>
+        <div style="font-size:14px;font-weight:700;color:var(--ink);">Botti</div>
+        <div style="font-size:12px;color:var(--serenity-dark);margin-top:3px;font-weight:500;">Bot explorativo</div>
+      </button>
+    </div>
+
+    <button class="test-banner dark-ctx" onclick="goTo('test')" type="button" aria-label="Comenzar diagnóstico de bloqueo creativo" style="border-left:4px solid var(--serenity-deep);">
+      <div style="font-size:11px;color:var(--serenity);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;font-weight:700;">Diagnóstico</div>
+      <div style="font-size:21px;font-weight:700;color:#fff;letter-spacing:-.4px;margin-bottom:16px;line-height:1.25;">¿Sientes un bloqueo?<br>Vamos a entenderlo.</div>
+      <span style="background:var(--serenity-deep);color:#fff;border-radius:20px;padding:9px 18px;font-size:13px;font-weight:700;display:inline-block;" aria-hidden="true">Comenzar test →</span>
+    </button>
+
+    <button class="mini-card" onclick="goTo('explore')" type="button" style="display:flex;align-items:center;gap:16px;padding:16px 18px;">
+      <div style="width:36px;height:36px;background:var(--ink);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      </div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:var(--ink);">Explorar recursos</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px;font-weight:500;">Moodboards e inspiración curada</div>
+      </div>
+      <div style="margin-left:auto;color:var(--border-ui);font-size:18px;" aria-hidden="true">›</div>
+    </button>
+  </main>
+  <nav class="tab-bar" id="tb-home" aria-label="Navegación principal"></nav>
+</div>
+
+<!-- ═══════════════════════════════════════
+     TEST
+════════════════════════════════════════ -->
+<div class="screen" id="screen-test">
+  <div class="sb" aria-hidden="true"><span class="sb-t">9:41</span><span style="font-size:13px;color:var(--ink);">●●●</span></div>
+  <div class="nav-row">
+    <button class="nav-btn" onclick="confirmLeaveTest()" aria-label="Salir del test">←</button>
+    <span style="font-size:15px;font-weight:600;color:var(--ink);" id="test-title" aria-live="polite" aria-atomic="true">Pregunta 1 de 6</span>
+    <button class="nav-btn" onclick="confirmLeaveTest()" aria-label="Cerrar test" style="font-size:14px;">✕</button>
+  </div>
+  <div style="padding:0 24px 20px;">
+    <div class="prog-wrap" id="prog-wrap" role="progressbar" aria-valuenow="17" aria-valuemin="0" aria-valuemax="100" aria-label="Progreso del diagnóstico: pregunta 1 de 6">
+      <div class="prog-fill" id="test-prog" style="width:16.6%"></div>
+    </div>
+  </div>
+  <div class="scroll" id="test-body" role="main"></div>
+  <div style="padding:12px 24px 28px;flex-shrink:0;">
+    <button class="btn-cont" id="btn-cont" onclick="nextQ()" aria-disabled="true">Continuar</button>
+  </div>
+  <div class="overlay" id="ov-test" role="dialog" aria-modal="true" aria-labelledby="ov-test-title" aria-describedby="ov-test-desc">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <h2 id="ov-test-title" style="font-size:22px;font-weight:700;color:var(--ink);letter-spacing:-.5px;margin-bottom:8px;">¿Abandonar el test?</h2>
+      <p id="ov-test-desc" style="font-size:15px;color:var(--muted);line-height:1.6;margin-bottom:28px;">Perderás tu progreso actual. Podrás retomarlo cuando quieras.</p>
+      <button class="btn-red" onclick="goTo('home')" style="background:var(--error);">Sí, salir</button>
+      <button class="btn-ghost" style="margin-top:10px;" onclick="closeOv('ov-test')">Continuar test</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     DASHBOARD — RESULTADOS
+════════════════════════════════════════ -->
+<div class="screen" id="screen-dashboard">
+  <div class="sb" aria-hidden="true"><span class="sb-t">9:41</span><span style="font-size:13px;color:var(--ink);">●●●</span></div>
+  <div class="nav-row">
+    <button class="nav-btn" onclick="goTo('home')" aria-label="Cerrar resultados" style="font-size:14px;">✕</button>
+    <span style="font-size:15px;font-weight:600;color:var(--ink);">Tu diagnóstico</span>
+    <span style="width:44px;"></span>
+  </div>
+  <div class="scroll">
+    <div style="width:72px;height:72px;background:var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:32px;" aria-hidden="true">🧠</div>
+    <p style="font-size:11px;color:var(--muted);text-align:center;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;font-weight:600;">Tu tipo de bloqueo</p>
+    <h2 tabindex="-1" style="font-size:24px;font-weight:700;color:var(--ink);text-align:center;letter-spacing:-.5px;margin-bottom:10px;line-height:1.2;">Perfeccionismo Paralizante</h2>
+    <p style="font-size:14px;color:var(--muted);text-align:center;line-height:1.65;margin-bottom:8px;">Tu bloqueo viene del miedo a no alcanzar tus propios estándares. Necesitas dar espacio a la imperfección.</p>
+    <div style="display:flex;justify-content:center;margin-bottom:24px;">
+      <span style="background:var(--warning-soft);border:1px solid var(--warning-border);font-size:12px;color:#8B5000;padding:5px 14px;border-radius:20px;font-weight:600;">Alta intensidad · Muy común en creativos</span>
+    </div>
+    <div class="divider"></div>
+    <p class="sec-label" style="display:flex;align-items:center;gap:8px;">Soluciones inmediatas <span style="background:var(--warning-soft);border:1px solid var(--warning-border);color:#8B5000;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700;text-transform:none;letter-spacing:0;">Para ti</span></p>
+    <div class="insight-row">
+      <div class="i-icon" aria-hidden="true">💡</div>
+      <div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px;">Boceto de 5 minutos</div><div style="font-size:13px;color:var(--muted);line-height:1.5;">Comienza sin juzgar. Pon algo en el papel en 5 minutos sin evaluarlo.</div></div>
+    </div>
+    <div class="insight-row">
+      <div class="i-icon" aria-hidden="true">⏱</div>
+      <div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px;">Sesiones cortas</div><div style="font-size:13px;color:var(--muted);line-height:1.5;">Bloques de 20–25 min reducen la autocrítica significativamente.</div></div>
+    </div>
+    <div class="insight-row">
+      <div class="i-icon" aria-hidden="true">✍️</div>
+      <div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px;">Escritura libre</div><div style="font-size:13px;color:var(--muted);line-height:1.5;">15 min sin releer. El juicio llega después, primero la idea.</div></div>
+    </div>
+    <div style="margin-top:24px;">
+      <button class="btn-primary" onclick="goTo('chat')">Hablar con el Asistente</button>
+      <button class="btn-outline" onclick="goTo('explore')">Ver recursos</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     CHAT
+════════════════════════════════════════ -->
+<div class="screen" id="screen-chat" style="background:var(--surface);">
+  <div class="sb" aria-hidden="true" style="background:linear-gradient(160deg,#C7E1EF 0%,#dff0f8 50%,var(--surface) 100%);"><span class="sb-t">9:41</span><span style="font-size:13px;color:var(--ink);">●●●</span></div>
+  <div style="display:flex;align-items:center;gap:10px;padding:0 20px 18px;border-bottom:1px solid var(--serenity);background:linear-gradient(160deg,#C7E1EF 0%,#dff0f8 50%,var(--surface) 100%);flex-shrink:0;">
+    <button class="nav-btn" onclick="goTo('home')" aria-label="Volver al inicio" style="background:rgba(255,255,255,.55);">←</button>
+    <div style="display:flex;align-items:center;gap:10px;flex:1;">
+      <div style="width:40px;height:40px;background:linear-gradient(135deg,#C7E1EF,var(--serenity-deep));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--serenity-dark);box-shadow:0 2px 12px rgba(155,189,212,.4);flex-shrink:0;" aria-hidden="true">✦</div>
+      <div>
+        <div style="font-size:15px;font-weight:600;color:var(--ink);letter-spacing:-.2px;">Botti</div>
+        <div style="font-size:11px;color:var(--hint);display:flex;align-items:center;gap:4px;"><span style="width:5px;height:5px;background:var(--success);border-radius:50%;display:inline-block;" aria-hidden="true"></span><span style='color:var(--success);font-weight:600;'>En línea</span></div>
+      </div>
+    </div>
+    <button class="nav-btn" onclick="goTo('home')" aria-label="Cerrar chat" style="font-size:14px;">✕</button>
+  </div>
+  <div class="msgs" id="chat-msgs" role="log" aria-live="polite" aria-label="Conversación con Botti">
+    <div class="msg ai"><div class="bubble">Hola 👋 Soy Botti, tu asistente creativo. Cuéntame qué está pasando con tu proceso. ¿Por dónde empezamos?</div><div class="msg-t">9:38</div></div>
+    <div class="msg me"><div class="bubble">No sé cómo empezar mi proyecto. Llevo días dando vueltas.</div><div class="msg-t">9:40</div></div>
+    <div class="msg ai" id="typing-node" style="display:none;" aria-hidden="true">
+      <div class="tw"><div class="td"></div><div class="td"></div><div class="td"></div></div>
+    </div>
+  </div>
+  <div style="padding:10px 16px 20px;display:flex;gap:10px;align-items:center;border-top:1px solid var(--serenity);background:var(--surface);flex-shrink:0;">
+    <label for="chat-inp" class="sr-only">Escribe tu mensaje a Botti</label>
+    <input class="chat-inp" id="chat-inp" placeholder="Escribe tu mensaje..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}" autocomplete="off" aria-label="Escribe tu mensaje a Botti"/>
+    <button class="send-btn" onclick="sendMsg()" aria-label="Enviar mensaje">↑</button>
+  </div>
+  <nav class="tab-bar" id="tb-chat" aria-label="Navegación principal"></nav>
+</div>
+
+<!-- ═══════════════════════════════════════
+     EXPLORAR
+════════════════════════════════════════ -->
+<div class="screen" id="screen-explore">
+  <div class="sb" aria-hidden="true"><span class="sb-t">9:41</span><span style="font-size:13px;color:var(--ink);">●●●</span></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:0 24px 12px;flex-shrink:0;">
+    <h2 tabindex="-1" style="font-size:26px;font-weight:700;color:var(--ink);letter-spacing:-.7px;">Explorar</h2>
+    <button style="width:44px;height:44px;background:var(--bg);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;" aria-label="Buscar recursos">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </button>
+  </div>
+  <div class="chips" role="group" aria-label="Filtrar contenido">
+    <button class="chip on" onclick="setChip(this)" aria-pressed="true">Todo</button>
+    <button class="chip" onclick="setChip(this)" aria-pressed="false">Inspiración</button>
+    <button class="chip" onclick="setChip(this)" aria-pressed="false">Técnicas</button>
+    <button class="chip" onclick="setChip(this)" aria-pressed="false">Ejercicios</button>
+  </div>
+  <div class="scroll" id="explore-scroll">
+
+    <!-- ── SECCIÓN TODO ── -->
+    <div class="explore-section" data-cat="todo">
+
+      <p class="sec-label">Destacado hoy</p>
+      <button type="button" onclick="goTo('recursos')" style="background:linear-gradient(135deg,#0f1923,#1c2d3a,#243848);border-radius:var(--radius-md);overflow:hidden;margin-bottom:20px;cursor:pointer;width:100%;border:none;text-align:left;font-family:'Rethink Sans',sans-serif;padding:0;display:block;">
+        <div style="height:160px;display:flex;align-items:flex-end;padding:16px;background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(10,18,28,.9) 100%);">
+          <div>
+            <div style="display:inline-flex;gap:6px;margin-bottom:10px;">
+              <span style="background:rgba(199,225,239,.15);border:1px solid rgba(199,225,239,.35);color:rgba(255,255,255,.95);font-size:11px;padding:4px 10px;border-radius:20px;font-weight:600;">Perfeccionismo</span>
+              <span style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:rgba(255,255,255,.9);font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;">7 min de lectura</span>
+            </div>
+            <div style="font-size:19px;font-weight:800;color:#fff;letter-spacing:-.4px;line-height:1.2;">El estándar imposible<br>que nadie te pidió</div>
+            <div style="font-size:13px;color:rgba(255,255,255,.6);margin-top:6px;line-height:1.45;">Tu mayor crítico no vive afuera. Aprende a negociar con él.</div>
+          </div>
+        </div>
+        <div style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between;">
+          <span style="background:#fff;color:var(--ink);border-radius:var(--radius-sm);padding:9px 16px;font-size:13px;font-weight:700;display:inline-block;">Leer ahora</span>
+          <span style="font-size:11px;color:rgba(255,255,255,.35);font-weight:500;">Para perfeccionistas</span>
+        </div>
+      </button>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <p class="sec-label" style="margin-bottom:0;">Moodboards</p>
+        <button class="text-btn" aria-label="Ver todos los moodboards">Ver todos</button>
+      </div>
+      <div class="grid2" style="margin-bottom:24px;">
+        <div class="rcard"><div class="rcard-img" style="background:#111111;aspect-ratio:3/4;">
+          <button class="fav-btn" onclick="toggleFav(this,'Hilma of Klint')" aria-pressed="false" aria-label="Agregar Hilma of Klint a favoritos">♡</button>
+          <div class="rcard-tag">Moodboard</div><div class="rcard-name">Hilma of Klint</div>
+        </div></div>
+        <div class="rcard"><div class="rcard-img" style="background:#111111;aspect-ratio:3/4;">
+          <button class="fav-btn" onclick="toggleFav(this,'Arte Tibetano')" aria-pressed="false" aria-label="Agregar Arte Tibetano a favoritos">♡</button>
+          <div class="rcard-tag">Moodboard</div><div class="rcard-name">Arte Tibetano</div>
+        </div></div>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <p class="sec-label" style="margin-bottom:0;">Ejercicios creativos</p>
+        <button class="text-btn" aria-label="Ver todos los ejercicios">Ver todos</button>
+      </div>
+      <div class="ex-card"><div style="width:36px;height:36px;background:var(--ink);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="1"/><circle cx="17.5" cy="10.5" r="1"/><circle cx="8.5" cy="7.5" r="1"/><circle cx="6.5" cy="12.5" r="1"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg></div>
+        <div style="flex:1;"><div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:3px;">Restricción de 3 colores</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.4;">Diseña usando solo 3 colores para forzar decisiones creativas</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:4px;"><span style="background:var(--ink);color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.2px;">15 min</span><span style="background:var(--success-soft);border:1px solid var(--success-border);color:#2d5c18;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;">Principiante</span></div></div></div>
+      <div class="ex-card"><div style="width:36px;height:36px;background:var(--ink);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+        <div style="flex:1;"><div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:3px;">Escritura automática</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.4;">Escribe sin parar durante 10 minutos. Sin borrar, sin juzgar.</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:4px;"><span style="background:var(--ink);color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.2px;">10 min</span><span style="background:var(--success-soft);border:1px solid var(--success-border);color:#2d5c18;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;">Principiante</span></div></div></div>
+    </div>
+
+    <!-- ── SECCIÓN INSPIRACIÓN ── -->
+    <div class="explore-section" data-cat="inspiracion" style="display:none;">
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <p class="sec-label" style="margin-bottom:0;">Moodboards</p>
+        <button class="text-btn">Ver todos</button>
+      </div>
+      <div class="grid2" style="margin-bottom:24px;">
+        <div class="rcard"><div class="rcard-img" style="background:#111111;aspect-ratio:3/4;">
+          <button class="fav-btn" onclick="toggleFav(this,'Hilma of Klint')" aria-pressed="false" aria-label="Agregar Hilma of Klint a favoritos">♡</button>
+          <div class="rcard-tag">Moodboard</div><div class="rcard-name">Hilma of Klint</div>
+        </div></div>
+        <div class="rcard"><div class="rcard-img" style="background:#111111;aspect-ratio:3/4;">
+          <button class="fav-btn" onclick="toggleFav(this,'Arte Tibetano')" aria-pressed="false" aria-label="Agregar Arte Tibetano a favoritos">♡</button>
+          <div class="rcard-tag">Moodboard</div><div class="rcard-name">Arte Tibetano</div>
+        </div></div>
+      </div>
+
+      <p class="sec-label">Lecturas que abren algo</p>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:8px;">
+
+        <button type="button" style="background:linear-gradient(135deg,#0f1923,#1c2d3a,#243848);border-radius:var(--radius-md);padding:18px 20px;border:none;text-align:left;font-family:'Rethink Sans',sans-serif;cursor:pointer;position:relative;overflow:hidden;">
+          <div style="position:absolute;top:0;right:0;width:60px;height:100%;background:linear-gradient(90deg,transparent,rgba(0,0,0,.02));"></div>
+          <div style="font-size:10px;color:rgba(255,255,255,.7);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:8px;">Zen · 5 min</div>
+          <div style="font-size:16px;font-weight:800;color:#fff;letter-spacing:-.3px;line-height:1.2;margin-bottom:6px;">La mente del principiante</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.75);line-height:1.5;">Shunryu Suzuki: ver el mundo como si fuera la primera vez, siempre.</div>
+        </button>
+
+        <button type="button" style="background:#fff;border-radius:var(--radius-md);padding:18px 20px;border:1px solid var(--border-ui);text-align:left;font-family:'Rethink Sans',sans-serif;cursor:pointer;display:flex;align-items:center;gap:16px;box-shadow:0 1px 4px rgba(0,0,0,.05);">
+          <div style="width:44px;height:56px;background:linear-gradient(160deg,#b8a4c8,#7a6490);border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;">📓</div>
+          <div style="flex:1;">
+            <div style="font-size:10px;color:var(--hint);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:5px;">Arte · 8 min</div>
+            <div style="font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-.2px;line-height:1.2;margin-bottom:4px;">El cuaderno de Cy Twombly</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.4;">Garabatos como práctica. El desorden como punto de partida.</div>
+          </div>
+        </button>
+
+        <button type="button" style="background:#fff;border-radius:var(--radius-md);padding:18px 20px;border:1px solid var(--border-ui);text-align:left;font-family:'Rethink Sans',sans-serif;cursor:pointer;display:flex;align-items:center;gap:16px;box-shadow:0 1px 4px rgba(0,0,0,.05);">
+          <div style="width:44px;height:56px;background:linear-gradient(160deg,#c2d8f0,#8ab4d8);border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;">🌀</div>
+          <div style="flex:1;">
+            <div style="font-size:10px;color:var(--hint);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:5px;">Proceso · 6 min</div>
+            <div style="font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-.2px;line-height:1.2;margin-bottom:4px;">Caos fértil</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.4;">Por qué el desorden mental precede siempre a las mejores ideas.</div>
+          </div>
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- ── SECCIÓN TÉCNICAS ── -->
+    <div class="explore-section" data-cat="tecnicas" style="display:none;">
+
+      <p class="sec-label">Para desbloquear</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
+        <div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.04);">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+    <div style="width:38px;height:38px;background:var(--ink);border-radius:10px;display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 13 9 17 9"/><path d="M12 22C6.48 22 2 17.52 2 12S6.48 2 12 2s10 4.48 10 10"/><line x1="22" y1="14" x2="14" y2="22"/><line x1="22" y1="22" x2="14" y2="14"/></svg></div>
+    <span style="font-size:10px;font-weight:700;color:var(--serenity-dark);background:var(--serenity-soft);border:1px solid var(--serenity);padding:3px 9px;border-radius:20px;">Acción</span>
+  </div>
+  <div style="font-size:14px;font-weight:800;color:var(--ink);margin-bottom:5px;letter-spacing:-.2px;">Regla de los 2 min</div>
+  <div style="font-size:12px;color:var(--muted);line-height:1.5;">Si tardas menos de 2 min, hazlo ahora.</div>
+</div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.04);">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+    <div style="width:38px;height:38px;background:var(--ink);border-radius:10px;display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
+    <span style="font-size:10px;font-weight:700;color:var(--serenity-dark);background:var(--serenity-soft);border:1px solid var(--serenity);padding:3px 9px;border-radius:20px;">Proceso</span>
+  </div>
+  <div style="font-size:14px;font-weight:800;color:var(--ink);margin-bottom:5px;letter-spacing:-.2px;">Fragmentación radical</div>
+  <div style="font-size:12px;color:var(--muted);line-height:1.5;">Divide hasta que lo primero sea ridículamente pequeño.</div>
+</div>
+      </div>
+
+      <p class="sec-label">Técnicas de enfoque</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
+        <div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.04);">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+    <div style="width:38px;height:38px;background:var(--ink);border-radius:10px;display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
+    <span style="font-size:10px;font-weight:700;color:var(--serenity-dark);background:var(--serenity-soft);border:1px solid var(--serenity);padding:3px 9px;border-radius:20px;">Claridad</span>
+  </div>
+  <div style="font-size:14px;font-weight:800;color:var(--ink);margin-bottom:5px;letter-spacing:-.2px;">Una sola cosa</div>
+  <div style="font-size:12px;color:var(--muted);line-height:1.5;">La tarea que haría que el día valiera la pena.</div>
+</div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.04);">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+    <div style="width:38px;height:38px;background:var(--ink);border-radius:10px;display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+    <span style="font-size:10px;font-weight:700;color:var(--serenity-dark);background:var(--serenity-soft);border:1px solid var(--serenity);padding:3px 9px;border-radius:20px;">Mente</span>
+  </div>
+  <div style="font-size:14px;font-weight:800;color:var(--ink);margin-bottom:5px;letter-spacing:-.2px;">Brain dump</div>
+  <div style="font-size:12px;color:var(--muted);line-height:1.5;">Vacía la mente en papel. Sin filtro, sin orden.</div>
+</div>
+      </div>
+
+      <p class="sec-label" style="margin-top:4px;">Contra el perfeccionismo</p>
+      <div style="background:linear-gradient(135deg,#852936,#6a1e2a);border-radius:var(--radius-md);padding:18px;margin-bottom:8px;">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+    <div style="width:34px;height:34px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+    <span style="font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:1.5px;text-transform:uppercase;">Herramienta</span>
+  </div>
+  <div style="font-size:15px;font-weight:800;color:#fff;margin-bottom:5px;letter-spacing:-.2px;">El umbral mínimo viable</div>
+  <div style="font-size:12px;color:rgba(255,255,255,.55);line-height:1.45;">Define qué necesita cumplir tu trabajo para estar listo. Escríbelo antes de empezar.</div>
+</div>
+      <div style="background:linear-gradient(135deg,#0f1923,#1c3048);border-radius:var(--radius-md);padding:18px;margin-bottom:8px;">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+    <div style="width:34px;height:34px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+    <span style="font-size:10px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:1.5px;text-transform:uppercase;">Ejercicio</span>
+  </div>
+  <div style="font-size:15px;font-weight:800;color:#fff;margin-bottom:5px;letter-spacing:-.2px;">El espejo del crítico</div>
+  <div style="font-size:12px;color:rgba(255,255,255,.55);line-height:1.45;">Escríbele al crítico interno. Ponle nombre. Hazlo ridículo.</div>
+</div>
+
+    </div>
+
+        <!-- ── SECCIÓN EJERCICIOS ── -->
+    <div class="explore-section" data-cat="ejercicios" style="display:none;">
+
+      <p class="sec-label">Calentamiento creativo</p>
+      <div class="ex-card"><div style="width:36px;height:36px;background:var(--ink);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+        <div style="flex:1;"><div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:3px;">Escritura automática</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.4;">Sin parar, sin borrar, sin juzgar. Solo la mano moviéndose.</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:4px;"><span style="background:var(--ink);color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.2px;">10 min</span><span style="background:var(--success-soft);border:1px solid var(--success-border);color:#2d5c18;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;">Principiante</span></div></div></div>
+      <div class="ex-card"><div style="width:36px;height:36px;background:var(--ink);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+        <div style="flex:1;"><div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:3px;">Observación sin nombre</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.4;">Elige un objeto y descríbelo sin usar su nombre ni sus funciones.</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:4px;"><span style="background:var(--ink);color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.2px;">8 min</span><span style="background:var(--success-soft);border:1px solid var(--success-border);color:#2d5c18;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;">Principiante</span></div></div></div>
+
+      <p class="sec-label" style="margin-top:8px;">Técnica y práctica</p>
+      <div class="ex-card"><div style="width:36px;height:36px;background:var(--ink);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="1"/><circle cx="17.5" cy="10.5" r="1"/><circle cx="8.5" cy="7.5" r="1"/><circle cx="6.5" cy="12.5" r="1"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg></div>
+        <div style="flex:1;"><div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:3px;">Restricción de 3 colores</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.4;">Diseña usando solo 3 colores. La restricción libera.</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:4px;"><span style="background:var(--ink);color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.2px;">15 min</span><span style="background:var(--success-soft);border:1px solid var(--success-border);color:#2d5c18;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;">Principiante</span></div></div></div>
+      <div class="ex-card"><div style="width:36px;height:36px;background:var(--ink);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></div>
+        <div style="flex:1;"><div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:3px;">Sketching rápido</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.4;">30 bocetos en 30 minutos. La cantidad vence a la calidad.</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:4px;"><span style="background:var(--ink);color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.2px;">30 min</span><span style="background:var(--warning-soft);border:1px solid var(--warning-border);color:#8B5000;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;">Intermedio</span></div></div></div>
+      <div class="ex-card"><div style="width:36px;height:36px;background:var(--ink);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg></div>
+        <div style="flex:1;"><div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:3px;">Rediseño aleatorio</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.4;">Toma un objeto cotidiano y reimagínalo completamente.</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:4px;"><span style="background:var(--ink);color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.2px;">45 min</span><span style="background:var(--warning-soft);border:1px solid var(--warning-border);color:#8B5000;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;">Intermedio</span></div></div></div>
+
+      <p class="sec-label" style="margin-top:8px;">Desafíos avanzados</p>
+      <div class="ex-card"><div style="width:36px;height:36px;background:var(--ink);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg></div>
+        <div style="flex:1;"><div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:3px;">Silencio creativo</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.4;">Trabaja 45 minutos sin música, sin ruido, sin interrupciones. Solo tú y la obra.</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:4px;"><span style="background:var(--ink);color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.2px;">45 min</span><span style="background:var(--error-soft);border:1px solid var(--error-border);color:var(--error);font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;">Avanzado</span></div></div></div>
+      <div class="ex-card"><div style="width:36px;height:36px;background:var(--ink);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a9 9 0 0 1 9 9v1a9 9 0 0 1-18 0v-1a9 9 0 0 1 9-9z"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="8" y1="22" x2="16" y2="22"/></svg></div>
+        <div style="flex:1;"><div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:3px;">Copia para destruir</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.4;">Replica una obra que admires con exactitud. Luego rómpela, tuércela, hazla tuya.</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:4px;"><span style="background:var(--ink);color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.2px;">60 min</span><span style="background:var(--error-soft);border:1px solid var(--error-border);color:var(--error);font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;">Avanzado</span></div></div></div>
+    </div>
+
+  </div>
+  <nav class="tab-bar" id="tb-explore" aria-label="Navegación principal"></nav>
+</div>
+
+<!-- ═══════════════════════════════════════
+     RECURSOS
+════════════════════════════════════════ -->
+<div class="screen" id="screen-recursos">
+  <div class="sb" aria-hidden="true"><span class="sb-t">9:41</span></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:0 20px 14px;border-bottom:1px solid var(--border);flex-shrink:0;">
+    <button class="nav-btn" onclick="goTo('dashboard')" aria-label="Volver a resultados">←</button>
+    <h2 tabindex="-1" style="font-size:15px;font-weight:600;color:var(--ink);">Recursos para ti</h2>
+    <button class="nav-btn" style="background:transparent;font-size:18px;" aria-label="Guardar en marcadores">🔖</button>
+  </div>
+  <p style="font-size:13px;color:var(--muted);padding:12px 24px 0;line-height:1.5;">Herramientas para superar el perfeccionismo</p>
+  <div class="scroll" style="padding-top:16px;">
+    <p class="sec-label">Ejercicios rápidos</p>
+    <div class="card" style="margin-bottom:10px;">
+      <div style="display:flex;gap:14px;align-items:flex-start;">
+        <div class="i-icon" style="border-radius:12px;flex-shrink:0;" aria-hidden="true">✏️</div>
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:4px;">Boceto de 5 minutos</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:12px;">Dibuja tu idea principal sin juzgar el resultado. Solo fluye.</div>
+          <button class="btn-sm">Comenzar</button>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:20px;">
+      <div style="display:flex;gap:14px;align-items:flex-start;">
+        <div class="i-icon" style="border-radius:12px;flex-shrink:0;" aria-hidden="true">📋</div>
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:4px;">Lista "suficientemente bueno"</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:12px;">Define 3 criterios mínimos que tu proyecto debe cumplir.</div>
+          <button class="btn-sm">Crear lista</button>
+        </div>
+      </div>
+    </div>
+    <p class="sec-label">Técnicas de mindset</p>
+    <div class="card" style="margin-bottom:10px;">
+      <div style="display:flex;gap:14px;align-items:center;">
+        <div class="i-icon" style="border-radius:12px;flex-shrink:0;" aria-hidden="true">🧠</div>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:2px;">Reframe cognitivo</div>
+          <div style="font-size:12px;color:var(--muted);">Cambia "debe ser perfecto" por "debe funcionar"</div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:24px;">
+      <button class="btn-primary" onclick="goTo('chat')">Hablar con el Asistente</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     FOCUS TIMER
+════════════════════════════════════════ -->
+<div class="screen" id="screen-focus">
+  <div class="sb" aria-hidden="true"><span class="sb-t">9:41</span></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:0 24px 8px;flex-shrink:0;">
+    <h2 tabindex="-1" style="font-size:17px;font-weight:700;color:var(--ink);letter-spacing:-.3px;">Sesión de Enfoque</h2>
+    <button onclick="tryLeave()" style="width:44px;height:44px;background:var(--bg);border-radius:50%;border:none;cursor:pointer;font-size:18px;color:var(--ink);display:flex;align-items:center;justify-content:center;" aria-label="Opciones de sesión">⋮</button>
+  </div>
+  <label for="task-inp" class="sr-only">¿En qué vas a trabajar hoy?</label>
+  <input id="task-inp" placeholder="¿En qué vas a trabajar hoy?" autocomplete="on" style="background:var(--bg);border:1.5px solid var(--border-ui);border-radius:var(--radius-md);padding:14px 18px;font-size:15px;font-family: 'Rethink Sans', sans-serif;color:var(--ink);outline:none;margin:0 24px 16px;width:calc(100% - 48px);display:block;flex-shrink:0;transition:border-color .2s;" onfocus="this.style.borderColor='var(--ink)';this.style.outline='3px solid #0055CC';this.style.outlineOffset='2px';" onblur="this.style.borderColor='var(--border-ui)';this.style.outline='none';"/>
+  <div class="focus-body">
+    <div style="position:relative;width:220px;height:220px;margin-bottom:20px;">
+      <svg width="220" height="220" viewBox="0 0 220 220" style="transform:rotate(-90deg)" aria-hidden="true">
+        <circle cx="110" cy="110" r="96" fill="none" stroke="#EBEBEB" stroke-width="7"/>
+        <circle cx="110" cy="110" r="96" fill="none" stroke="var(--serenity-deep, #9BBDD4)" stroke-width="7" stroke-linecap="round" stroke-dasharray="603" id="t-arc" stroke-dashoffset="0" style="transition:stroke-dashoffset 1s linear;"/>
+      </svg>
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;">
+        <div id="t-disp" role="timer" aria-label="Tiempo restante" style="font-size:46px;font-weight:800;color:var(--ink);letter-spacing:-2px;font-variant-numeric:tabular-nums;line-height:1;">25:00</div>
+        <div id="t-lbl" style="font-size:12px;color:var(--serenity-dark);margin-top:4px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;">Focus</div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-bottom:18px;">
+      <div id="t-task" style="font-size:17px;font-weight:700;color:var(--ink);letter-spacing:-.3px;margin-bottom:3px;">Sesión de trabajo</div>
+      <div id="t-sub" style="font-size:13px;color:var(--muted);">Enfócate en tu tarea</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:24px;" aria-label="Ciclos Pomodoro completados" role="img">
+      <div class="cyc-dot cur" id="c0"></div><div class="cyc-dot" id="c1"></div><div class="cyc-dot" id="c2"></div><div class="cyc-dot" id="c3"></div>
+    </div>
+    <div style="display:flex;gap:20px;align-items:center;">
+      <button class="ctrl" onclick="resetTimer()" aria-label="Reiniciar temporizador">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>
+      </button>
+      <button class="ctrl-play" id="btn-pp" onclick="toggleTimer()" aria-label="Reproducir temporizador" aria-pressed="false">
+        <svg id="pp-ico" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      </button>
+      <button class="ctrl" onclick="skipPhase()" aria-label="Saltar fase">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+      </button>
+    </div>
+    <div style="margin-top:18px;font-size:12px;color:var(--hint);text-align:center;" id="session-info" aria-live="polite">Sesión 1 de 4 · Descanso: 5 min</div>
+  </div>
+  <nav class="tab-bar" id="tb-focus" aria-label="Navegación principal"></nav>
+  <div class="overlay" id="ov-focus" role="dialog" aria-modal="true" aria-labelledby="ov-focus-title" aria-describedby="ov-focus-desc">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <h2 id="ov-focus-title" style="font-size:22px;font-weight:700;color:var(--ink);letter-spacing:-.5px;margin-bottom:8px;">¿Salir de la sesión?</h2>
+      <p id="ov-focus-desc" style="font-size:15px;color:var(--muted);line-height:1.6;margin-bottom:28px;">Perderás el progreso de esta ronda Pomodoro.</p>
+      <button class="btn-red" onclick="leaveTimer()">Sí, salir</button>
+      <button class="btn-ghost" style="margin-top:10px;" onclick="closeOv('ov-focus')">Continuar sesión</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SESIONES
+════════════════════════════════════════ -->
+<div class="screen" id="screen-sessions">
+  <div class="sb" aria-hidden="true"><span class="sb-t">9:41</span></div>
+  <div class="scroll">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <h2 tabindex="-1" style="font-size:24px;font-weight:700;color:var(--ink);letter-spacing:-.6px;">Mis Sesiones</h2>
+      <button style="width:44px;height:44px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;" aria-label="Ordenar sesiones" aria-expanded="false">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="color:var(--muted);" aria-hidden="true"><polygon points="6 9 12 15 18 9"/></svg>
+      </button>
+    </div>
+    <div class="card-dark" style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+        <span style="font-size:13px;color:rgba(255,255,255,.65);font-weight:500;">Esta semana</span>
+        <span style="font-size:12px;color:rgba(255,255,255,.55);">Ene 6–12, 2025</span>
+      </div>
+      <div style="display:flex;gap:28px;margin-bottom:14px;">
+        <div><div style="font-size:30px;font-weight:800;color:#fff;letter-spacing:-.8px;">5</div><div style="font-size:11px;color:rgba(255,255,255,.5);">Sesiones</div></div>
+        <div><div style="font-size:30px;font-weight:800;color:#fff;letter-spacing:-.8px;">3h 45m</div><div style="font-size:11px;color:rgba(255,255,255,.5);">Tiempo en flow</div></div>
+      </div>
+      <div class="bar-chart" role="img" aria-label="Actividad de la semana: Lunes 30%, Martes 45%, Miércoles 60%, Jueves 80%, Viernes 100%, Sábado 20%, Domingo 15%">
+        <div class="bar" style="height:30%;" aria-hidden="true"></div>
+        <div class="bar" style="height:45%;" aria-hidden="true"></div>
+        <div class="bar" style="height:60%;" aria-hidden="true"></div>
+        <div class="bar" style="height:80%;" aria-hidden="true"></div>
+        <div class="bar active" style="height:100%;" aria-hidden="true"></div>
+        <div class="bar" style="height:20%;" aria-hidden="true"></div>
+        <div class="bar" style="height:15%;" aria-hidden="true"></div>
+      </div>
+      <div style="display:flex;justify-content:space-around;margin-top:5px;" aria-hidden="true">
+        <span style="font-size:10px;color:rgba(255,255,255,.3);">Lu</span><span style="font-size:10px;color:rgba(255,255,255,.3);">Ma</span><span style="font-size:10px;color:rgba(255,255,255,.3);">Mi</span><span style="font-size:10px;color:rgba(255,255,255,.3);">Ju</span><span style="font-size:10px;color:#fff;font-weight:700;">Vi</span><span style="font-size:10px;color:rgba(255,255,255,.3);">Sa</span><span style="font-size:10px;color:rgba(255,255,255,.3);">Do</span>
+      </div>
+    </div>
+    <div class="next-session">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="width:6px;height:6px;border-radius:50%;background:var(--serenity-deep);display:inline-block;" aria-hidden="true"></span>
+          <span style="font-size:12px;color:var(--muted);font-weight:600;">Próxima sesión</span>
+        </div>
+        <button class="text-btn" aria-label="Editar próxima sesión">Editar</button>
+      </div>
+      <div style="font-size:17px;font-weight:700;color:var(--ink);letter-spacing:-.4px;margin-bottom:3px;">Sesión de enfoque profundo</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:3px;">Pomodoro 25 min + 5 min descanso</div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);margin-bottom:14px;" aria-label="Programada hoy a las 15:00"><span aria-hidden="true">⏰</span> Hoy, 15:00</div>
+      <button class="btn-primary" onclick="goTo('focus')"><span aria-hidden="true">▶ </span>Iniciar ahora</button>
+    </div>
+    <p class="sec-label">Historial</p>
+    <div class="session-item">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+        <div>
+          <div style="font-size:15px;font-weight:600;color:var(--ink);margin-bottom:2px;">Sesión creativa</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Ayer, 14:30</div>
+          <div style="font-size:12px;color:var(--hint);" aria-label="45 minutos, 3 ciclos Pomodoro">⏱ 45 min · 🍅 3 pomodoros</div>
+        </div>
+        <div style="width:22px;height:22px;background:var(--success);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;margin-top:2px;flex-shrink:0;" aria-label="Completada">✓</div>
+      </div>
+      <div style="margin-top:10px;"><span style="background:var(--bg);color:var(--muted);font-size:11px;padding:4px 10px;border-radius:20px;font-weight:500;">Perfeccionismo</span></div>
+    </div>
+    <div class="session-item">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+        <div>
+          <div style="font-size:15px;font-weight:600;color:var(--ink);margin-bottom:2px;">Exploración visual</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Lunes, 10:15</div>
+          <div style="font-size:12px;color:var(--hint);" aria-label="25 minutos, 1 ciclo Pomodoro">⏱ 25 min · 🍅 1 pomodoro</div>
+        </div>
+        <div style="width:22px;height:22px;background:var(--success);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;margin-top:2px;flex-shrink:0;" aria-label="Completada">✓</div>
+      </div>
+      <div style="margin-top:10px;"><span style="background:var(--bg);color:var(--muted);font-size:11px;padding:4px 10px;border-radius:20px;font-weight:500;">Fatiga visual</span></div>
+    </div>
+  </div>
+  <nav class="tab-bar" id="tb-sessions" aria-label="Navegación principal"></nav>
+</div>
+
+<!-- ═══════════════════════════════════════
+     PERFIL
+════════════════════════════════════════ -->
+<div class="screen" id="screen-profile">
+  <div class="sb" aria-hidden="true"><span class="sb-t">9:41</span></div>
+  <div class="scroll">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <h2 tabindex="-1" style="font-size:24px;font-weight:700;color:var(--ink);letter-spacing:-.6px;">Mi Perfil</h2>
+      <button style="width:44px;height:44px;background:var(--bg);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;" aria-label="Ajustes del perfil">⚙️</button>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:24px;">
+      <div style="width:80px;height:80px;background:var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:12px;border:2px solid var(--border-ui);" role="img" aria-label="Foto de perfil">👩‍🎨</div>
+      <div id="profile-name-display" style="font-size:20px;font-weight:700;color:var(--ink);letter-spacing:-.4px;">Ana García</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:14px;" id="profile-type-display">Diseñadora UX/UI</div>
+      <button style="background:transparent;color:var(--ink);border:1.5px solid var(--border-ui);border-radius:24px;padding:10px 24px;font-size:13px;font-weight:500;cursor:pointer;font-family: 'Rethink Sans', sans-serif;min-height:44px;">Editar perfil</button>
+    </div>
+    <div class="divider"></div>
+    <p class="sec-label">Tu progreso</p>
+    <div style="display:flex;gap:10px;margin-bottom:24px;">
+      <div class="profile-stat"><div style="font-size:24px;font-weight:800;color:var(--ink);letter-spacing:-.5px;">12</div><div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.3;">Sesiones</div></div>
+      <div class="profile-stat"><div style="font-size:24px;font-weight:700;color:var(--ink);letter-spacing:-.5px;">8h</div><div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.3;">En flow</div></div>
+      <div class="profile-stat"><div style="font-size:24px;font-weight:800;color:var(--success);letter-spacing:-.5px;">5</div><div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.3;">Días seguidos</div></div>
+    </div>
+    <div class="divider"></div>
+    <p class="sec-label">Bloqueos superados</p>
+    <div class="badge-row"><div class="badge-icon" style="background:var(--success);" aria-hidden="true">✓</div><div><div style="font-size:14px;font-weight:600;color:var(--ink);">Perfeccionismo</div><div style="font-size:12px;color:var(--muted);">3 veces este mes</div></div></div>
+    <div class="badge-row"><div class="badge-icon" style="background:var(--success);" aria-hidden="true">✓</div><div><div style="font-size:14px;font-weight:600;color:var(--ink);">Fatiga visual</div><div style="font-size:12px;color:var(--muted);">2 veces este mes</div></div></div>
+    <div class="badge-row"><div class="badge-icon" style="background:var(--success);" aria-hidden="true">✓</div><div><div style="font-size:14px;font-weight:600;color:var(--ink);">Sobre-análisis</div><div style="font-size:12px;color:var(--muted);">1 vez este mes</div></div></div>
+    <div class="divider"></div>
+    <button class="btn-outline" onclick="resetApp()" style="color:var(--error);border-color:var(--error);font-weight:700;margin-top:4px;">Cerrar sesión</button>
+  </div>
+  <nav class="tab-bar" id="tb-profile" aria-label="Navegación principal"></nav>
+</div>
+
+<!-- ═══════════════════════════════════════
+     TOAST GLOBAL
+════════════════════════════════════════ -->
+<div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true">
+  <span id="toast-msg" style="font-size:14px;"></span>
+  <button id="toast-undo" class="toast-undo" onclick="undoFav()" style="display:none;" aria-label="Deshacer acción">Deshacer</button>
+</div>
+
+<!-- /app -->
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   ESTADO GLOBAL
+══════════════════════════════════════════════════════ */
+let userName = '';
+let userProfile = '';
+let obSlide = 0;
+
+/* ═══════════════════════════════════════════════════════
+   TABS
+══════════════════════════════════════════════════════ */
+const TABS = [
+  {id:'home',     label:'Inicio',   svg:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>'},
+  {id:'explore',  label:'Explorar', svg:'<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>'},
+  {id:'sessions', label:'Sesiones', svg:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'},
+  {id:'profile',  label:'Perfil',   svg:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'},
+];
+
+function buildTabs(cid, active) {
+  const el = document.getElementById(cid);
+  if (!el) return;
+  el.innerHTML = TABS.map(t => `
+    <button class="ti${t.id === active ? ' active' : ''}"
+      onclick="goTo('${t.id}')"
+      data-screen="${t.id}"
+      ${t.id === active ? 'aria-current="page"' : ''}
+      aria-label="${t.label}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">${t.svg}</svg>
+      <div class="ti-dot" aria-hidden="true"></div>
+      <span>${t.label}</span>
+    </button>`).join('');
+}
+
+['home','chat','explore','sessions','profile','focus'].forEach(id => {
+  buildTabs('tb-' + id, ['home','explore','sessions','profile'].includes(id) ? id : '');
+});
+
+/* ═══════════════════════════════════════════════════════
+   NAVEGACIÓN
+══════════════════════════════════════════════════════ */
+const TAB_MAP = {
+  home:'home', explore:'explore', recursos:'explore',
+  chat:'home', test:'home', dashboard:'home',
+  focus:'sessions', sessions:'sessions', profile:'profile'
+};
+
+const SCREEN_TITLES = {
+  splash: 'Cargando — Flowly',
+  slides: 'Bienvenida — Flowly',
+  'ob-name': 'Tu nombre — Flowly',
+  'ob-profile': 'Tu perfil creativo — Flowly',
+  'ob-challenge': 'Tus desafíos — Flowly',
+  'ob-ready': '¡Todo listo! — Flowly',
+  home: 'Inicio — Flowly',
+  test: 'Diagnóstico creativo — Flowly',
+  dashboard: 'Tu diagnóstico — Flowly',
+  chat: 'Botti, asistente — Flowly',
+  explore: 'Explorar recursos — Flowly',
+  recursos: 'Recursos para ti — Flowly',
+  focus: 'Sesión de enfoque — Flowly',
+  sessions: 'Mis sesiones — Flowly',
+  profile: 'Mi perfil — Flowly',
+};
+
+function goTo(s) {
+  const prevScreen = document.querySelector('.screen.active');
+  if (prevScreen) prevScreen.classList.remove('active');
+
+  const newScreen = document.getElementById('screen-' + s);
+  newScreen.classList.add('active');
+  newScreen.classList.add('slide-in');
+  setTimeout(() => newScreen.classList.remove('slide-in'), 300);
+
+  // Actualizar título del documento (WCAG 2.4.2)
+  document.title = SCREEN_TITLES[s] || 'Flowly';
+
+  if (s === 'test') { qIdx = 0; renderQ(); }
+  if (s === 'chat') setTimeout(showTyping, 900);
+  if (s === 'ob-ready') buildReadyScreen();
+
+  // Foco al título (WCAG 2.4.3)
+  requestAnimationFrame(() => {
+    if (s === 'chat') {
+      document.getElementById('chat-inp').focus();
+    } else {
+      const h = newScreen.querySelector('[tabindex="-1"]');
+      if (h) h.focus();
+    }
+  });
+
+  // Actualizar tabs
+  const active = TAB_MAP[s] || '';
+  ['home','chat','explore','sessions','profile','focus'].forEach(id => {
+    const el = document.getElementById('tb-' + id);
+    if (!el) return;
+    el.querySelectorAll('.ti').forEach(ti => {
+      const isA = ti.getAttribute('data-screen') === active;
+      ti.classList.toggle('active', isA);
+      if (isA) {
+        ti.setAttribute('aria-current', 'page');
+      } else {
+        ti.removeAttribute('aria-current');
+      }
+    });
+  });
+
+  // Actualizar saludo si volvemos a home
+  if (s === 'home') updateHomeGreeting();
+}
+
+/* ═══════════════════════════════════════════════════════
+   ONBOARDING — SLIDES
+══════════════════════════════════════════════════════ */
+function goSlide(n) {
+  obSlide = n;
+  document.getElementById('ob-track').style.transform = `translateX(-${n * 100}%)`;
+  document.querySelectorAll('.ob-dot').forEach((d, i) => {
+    d.classList.toggle('active', i === n);
+    d.setAttribute('aria-selected', i === n ? 'true' : 'false');
+  });
+  const btn = document.getElementById('ob-next-btn');
+  btn.textContent = n === 2 ? 'Comenzar' : 'Siguiente';
+  announce(`Slide ${n+1} de 3`);
+}
+
+function obNext() {
+  if (obSlide < 2) goSlide(obSlide + 1);
+  else goTo('ob-name');
+}
+
+/* ═══════════════════════════════════════════════════════
+   ONBOARDING — PASOS
+══════════════════════════════════════════════════════ */
+function checkName() {
+  const v = document.getElementById('inp-name').value.trim();
+  const btn = document.getElementById('btn-name');
+  const on = v.length >= 2;
+  btn.style.opacity = on ? '1' : '.2';
+  btn.setAttribute('aria-disabled', on ? 'false' : 'true');
+  if (on) userName = v;
+}
+
+function selProfile(el) {
+  document.querySelectorAll('.profile-opt').forEach(b => {
+    b.classList.remove('sel');
+    b.setAttribute('aria-pressed', 'false');
+  });
+  el.classList.add('sel');
+  el.setAttribute('aria-pressed', 'true');
+  userProfile = el.querySelector('.po-label').textContent;
+  const btn = document.getElementById('btn-profile');
+  btn.style.opacity = '1';
+  btn.setAttribute('aria-disabled', 'false');
+}
+
+function selChallenge(el) {
+  el.classList.toggle('sel');
+  el.setAttribute('aria-pressed', el.classList.contains('sel') ? 'true' : 'false');
+  const any = document.querySelectorAll('.chal-chip.sel').length > 0;
+  const btn = document.getElementById('btn-chal');
+  btn.style.opacity = any ? '1' : '.2';
+  btn.setAttribute('aria-disabled', any ? 'false' : 'true');
+}
+
+function buildReadyScreen() {
+  const name = userName || 'creativo';
+  document.getElementById('ready-title').textContent = `¡Todo listo, ${name}!`;
+  document.getElementById('ready-sub').textContent = 'Tu espacio personalizado está listo. Empieza cuando quieras.';
+  launchConfetti();
+  setTimeout(() => {
+    const h = document.getElementById('ready-title');
+    if (h) h.focus();
+  }, 100);
+}
+
+function launchConfetti() {
+  const wrap = document.getElementById('ready-confetti');
+  const colors = ['#111','#555','#888','#BBBBB'];
+  for (let i = 0; i < 12; i++) {
+    const d = document.createElement('div');
+    d.className = 'confetti-dot';
+    d.style.cssText = `
+      left:${Math.random()*100}%;
+      top:0;
+      background:${colors[i%colors.length]};
+      animation-delay:${Math.random()*.4}s;
+      animation-duration:${.6+Math.random()*.5}s;
+    `;
+    wrap.appendChild(d);
+    setTimeout(() => d.remove(), 1200);
+  }
+}
+
+function finishOnboarding() {
+  // Actualizar perfil con datos del onboarding
+  if (userName) {
+    document.getElementById('home-title').innerHTML = `¿Listo para<br>crear hoy?`;
+    document.getElementById('profile-name-display').textContent = userName;
+    if (userProfile) document.getElementById('profile-type-display').textContent = userProfile;
+  }
+  goTo('home');
+}
+
+function updateHomeGreeting() {
+  const h = new Date().getHours();
+  const greet = h < 12 ? '☀️ Buenos días' : h < 19 ? '🌤 Buenas tardes' : '🌙 Buenas noches';
+  const name = userName ? `, ${userName}` : '';
+  document.getElementById('home-greeting').textContent = greet + name + '!';
+}
+
+function resetApp() {
+  userName = ''; userProfile = '';
+  goTo('splash');
+  setTimeout(() => goTo('slides'), 400);
+}
+
+/* ═══════════════════════════════════════════════════════
+   OVERLAY / FOCUS TRAP
+══════════════════════════════════════════════════════ */
+function showOv(id) {
+  const ov = document.getElementById(id);
+  ov._prevFocus = document.activeElement;
+  ov.classList.add('show');
+  const focusable = ov.querySelectorAll('button:not([disabled]), input, [tabindex]:not([tabindex="-1"])');
+  if (focusable.length) focusable[0].focus();
+  ov._kh = (e) => {
+    if (e.key === 'Escape') { closeOv(id); return; }
+    if (e.key === 'Tab') {
+      const els = Array.from(ov.querySelectorAll('button:not([disabled]), input'));
+      const first = els[0], last = els[els.length-1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  };
+  document.addEventListener('keydown', ov._kh);
+}
+
+function closeOv(id) {
+  const ov = document.getElementById(id);
+  ov.classList.remove('show');
+  if (ov._kh) document.removeEventListener('keydown', ov._kh);
+  if (ov._prevFocus) ov._prevFocus.focus();
+}
+
+/* ═══════════════════════════════════════════════════════
+   TEST
+══════════════════════════════════════════════════════ */
+const QS = [
+  {q:"¿Cómo te sientes cuando enfrentas un proyecto nuevo?", opts:["Emocionado y con muchas ideas","Abrumado, no sé por dónde empezar","Nervioso, temo no hacerlo perfecto","Cansado, sin energía creativa"]},
+  {q:"¿Cuándo fue la última vez que sentiste flujo creativo?", opts:["Esta semana","Este mes","Hace más de un mes","No lo recuerdo bien"]},
+  {q:"¿Qué sientes al comenzar a crear?", opts:["Ansiedad o presión interna","Vacío y apatía","Distracción constante","Miedo a no estar a la altura"]},
+  {q:"¿Con qué frecuencia comparas tu trabajo con el de otros?", opts:["Casi siempre","Con frecuencia","Rara vez","Casi nunca"]},
+  {q:"¿Qué suele interrumpir tu proceso creativo?", opts:["El teléfono y las redes","La autocrítica excesiva","La fatiga física o mental","No saber qué hacer exactamente"]},
+  {q:"¿Cómo describirías tu entorno de trabajo actual?", opts:["Caótico y con muchas distracciones","Silencioso pero sin inspiración","Cómodo y bastante funcional","No tengo un espacio fijo"]},
+];
+let qIdx = 0, sel = null;
+
+function renderQ() {
+  const d = QS[qIdx];
+  const pct = Math.round((qIdx+1)/QS.length*100);
+  document.getElementById('test-title').textContent = `Pregunta ${qIdx+1} de ${QS.length}`;
+  document.getElementById('test-prog').style.width = pct + '%';
+  const pw = document.getElementById('prog-wrap');
+  pw.setAttribute('aria-valuenow', pct);
+  pw.setAttribute('aria-label', `Progreso del diagnóstico: pregunta ${qIdx+1} de ${QS.length}`);
+  sel = null;
+  const cont = document.getElementById('btn-cont');
+  cont.classList.remove('on');
+  cont.setAttribute('aria-disabled', 'true');
+  document.getElementById('test-body').innerHTML =
+    `<div style="padding:0 24px;">
+      <p style="font-size:12px;color:var(--hint);margin-bottom:12px;font-weight:600;" aria-hidden="true">Pregunta ${qIdx+1}</p>
+      <p id="q-text-${qIdx}" style="font-size:22px;font-weight:700;color:var(--ink);line-height:1.25;letter-spacing:-.6px;margin-bottom:28px;">${d.q}</p>
+      <div role="group" aria-labelledby="q-text-${qIdx}">
+        ${d.opts.map(o => `<button class="opt-btn" onclick="selOpt(this)" aria-pressed="false">${o}</button>`).join('')}
+      </div>
+    </div>`;
+  // Mover foco a la pregunta para lectores de pantalla (WCAG 2.4.3)
+  requestAnimationFrame(() => {
+    const qEl = document.getElementById(`q-text-${qIdx}`);
+    if (qEl) { qEl.setAttribute('tabindex', '-1'); qEl.focus(); }
+  });
+}
+
+function selOpt(el) {
+  document.querySelectorAll('.opt-btn').forEach(b => { b.classList.remove('sel'); b.setAttribute('aria-pressed','false'); });
+  el.classList.add('sel');
+  el.setAttribute('aria-pressed','true');
+  sel = 1;
+  const cont = document.getElementById('btn-cont');
+  cont.classList.add('on');
+  cont.removeAttribute('aria-disabled');
+}
+
+function nextQ() {
+  const cont = document.getElementById('btn-cont');
+  if (cont.getAttribute('aria-disabled') === 'true') return;
+  qIdx++;
+  if (qIdx >= QS.length) { qIdx = 0; goTo('dashboard'); return; }
+  renderQ();
+}
+
+function confirmLeaveTest() { showOv('ov-test'); }
+
+/* ═══════════════════════════════════════════════════════
+   CHAT
+══════════════════════════════════════════════════════ */
+const REPLIES = [
+  "Entiendo ese ciclo. El bloqueo de inicio es muy común en creativos de alto estándar. Prueba esto: abre un documento y escribe 3 minutos sin parar, sin releer. ¿Lo intentamos?",
+  "Lo que describes suena a perfeccionismo paralítico. Tu cerebro intenta protegerte del fracaso, pero te está bloqueando. ¿Cuál sería el paso más pequeño posible para avanzar hoy?",
+  "Muy bien identificado. ¿Hay algún proyecto donde recuerdes ese estado de flujo? Volver a ese contexto puede ser la señal que necesita tu sistema nervioso.",
+  "Una cosa que funciona bien es cambiar el medio: si trabajas en digital, intenta en papel 5 minutos. El cambio físico desbloquea circuitos distintos. ¿Tienes papel cerca?"
+];
+let rIdx = 0, busy = false;
+
+function showTyping() {
+  if (busy) return; busy = true;
+  const t = document.getElementById('typing-node');
+  t.style.display = 'block';
+  scrollChat();
+  setTimeout(() => {
+    t.style.display = 'none'; busy = false;
+    const c = document.getElementById('chat-msgs');
+    const d = document.createElement('div');
+    d.className = 'msg ai';
+    const now = new Date().toLocaleTimeString('es', {hour:'2-digit',minute:'2-digit'});
+    d.innerHTML = `<div class="bubble">${REPLIES[rIdx % REPLIES.length]}</div><div class="msg-t">${now}</div>`;
+    c.insertBefore(d, t); rIdx++; scrollChat();
+  }, 1800);
+}
+
+function scrollChat() {
+  const m = document.getElementById('chat-msgs');
+  m.scrollTop = m.scrollHeight;
+}
+
+function sendMsg() {
+  const inp = document.getElementById('chat-inp'), txt = inp.value.trim();
+  if (!txt) return;
+  const c = document.getElementById('chat-msgs'), t = document.getElementById('typing-node');
+  const d = document.createElement('div');
+  d.className = 'msg me';
+  const now = new Date().toLocaleTimeString('es', {hour:'2-digit',minute:'2-digit'});
+  d.innerHTML = `<div class="bubble">${txt}</div><div class="msg-t">${now}</div>`;
+  c.insertBefore(d, t); inp.value = ''; scrollChat();
+  setTimeout(showTyping, 600);
+}
+
+/* ═══════════════════════════════════════════════════════
+   EXPLORE — chips y favoritos
+══════════════════════════════════════════════════════ */
+function setChip(el) {
+  document.querySelectorAll('.chip').forEach(c => { c.classList.remove('on'); c.setAttribute('aria-pressed','false'); });
+  el.classList.add('on'); el.setAttribute('aria-pressed','true');
+  const map = {'Todo':'todo','Inspiración':'inspiracion','Técnicas':'tecnicas','Ejercicios':'ejercicios'};
+  const cat = map[el.textContent.trim()] || 'todo';
+  document.querySelectorAll('.explore-section').forEach(s => {
+    s.style.display = (s.dataset.cat === cat) ? 'block' : 'none';
+  });
+}
+
+let lastFav = null;
+
+function toggleFav(btn, name) {
+  const isOn = btn.classList.contains('on');
+  if (isOn) {
+    btn.classList.remove('on'); btn.textContent = '♡';
+    btn.setAttribute('aria-pressed','false');
+    btn.setAttribute('aria-label', `Agregar ${name} a favoritos`);
+    lastFav = btn;
+    showToast(`${name} eliminado de favoritos`, true);
+  } else {
+    btn.classList.add('on'); btn.textContent = '♥';
+    btn.setAttribute('aria-pressed','true');
+    btn.setAttribute('aria-label', `Quitar ${name} de favoritos`);
+    showToast(`${name} guardado en favoritos`, false);
+  }
+}
+
+function undoFav() {
+  if (lastFav) {
+    lastFav.classList.add('on'); lastFav.textContent = '♥';
+    lastFav.setAttribute('aria-pressed','true');
+  }
+  hideToast();
+  announce('Acción deshecha');
+}
+
+/* ═══════════════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════════════ */
+let toastTimer;
+function showToast(msg, showUndo) {
+  const t = document.getElementById('toast');
+  const m = document.getElementById('toast-msg');
+  const u = document.getElementById('toast-undo');
+  m.textContent = msg;
+  u.style.display = showUndo ? 'block' : 'none';
+  t.classList.add('show');
+  announce(msg);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(hideToast, 4000);
+}
+function hideToast() {
+  document.getElementById('toast').classList.remove('show');
+}
+
+/* ═══════════════════════════════════════════════════════
+   ANUNCIADOR AT
+══════════════════════════════════════════════════════ */
+function announce(msg) {
+  const a = document.getElementById('sr-announcer');
+  a.textContent = '';
+  requestAnimationFrame(() => { a.textContent = msg; });
+}
+
+/* ═══════════════════════════════════════════════════════
+   FOCUS TIMER
+══════════════════════════════════════════════════════ */
+let tInt=null, tRun=false, tSecs=1500, tTotal=1500, tPhase=0, tCycle=0;
+const PH = [
+  {l:'Focus', s:'Enfócate en tu tarea', d:1500, c:'var(--serenity-deep)'},
+  {l:'Descanso', s:'Tómate un descanso breve', d:300, c:'var(--warning)'}
+];
+const DASH = 603;
+
+function updTimer() {
+  const m = Math.floor(tSecs/60), s = tSecs%60;
+  document.getElementById('t-disp').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  document.getElementById('t-arc').setAttribute('stroke-dashoffset', DASH*(1-(tSecs/tTotal)));
+}
+
+function toggleTimer() {
+  const btn = document.getElementById('btn-pp');
+  if (tRun) {
+    clearInterval(tInt); tRun = false;
+    document.getElementById('pp-ico').innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
+    btn.setAttribute('aria-pressed','false'); btn.setAttribute('aria-label','Reproducir temporizador');
+  } else {
+    tRun = true;
+    document.getElementById('pp-ico').innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+    btn.setAttribute('aria-pressed','true'); btn.setAttribute('aria-label','Pausar temporizador');
+    tInt = setInterval(() => { tSecs--; if (tSecs<=0) { nextPhase(); return; } updTimer(); }, 1000);
+  }
+  const ti = document.getElementById('task-inp').value.trim();
+  if (ti) document.getElementById('t-task').textContent = ti;
+}
+
+
+function launchCelebration() {
+  const arc = document.getElementById('t-arc');
+  const svg = arc.closest('svg');
+  const svgRect = svg.getBoundingClientRect();
+  const cx = svgRect.left + svgRect.width / 2;
+  const cy = svgRect.top + svgRect.height / 2;
+  const r = svgRect.width * 0.44;
+
+  // Checkmark appears inside the circle
+  const check = document.createElement('div');
+  check.style.cssText = `
+    position:fixed;left:${cx}px;top:${cy}px;
+    width:70px;height:70px;
+    border-radius:50%;
+    background:linear-gradient(135deg,var(--serenity-deep),#2a6a8a);
+    display:flex;align-items:center;justify-content:center;
+    transform:translate(-50%,-50%) scale(0);
+    pointer-events:none;z-index:9999;
+    box-shadow:0 0 0 0 rgba(155,189,212,.6);
+    transition:transform .4s cubic-bezier(.175,.885,.32,1.275);
+  `;
+  check.innerHTML = `<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+  document.body.appendChild(check);
+
+  // Pop in
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    check.style.transform = 'translate(-50%,-50%) scale(1)';
+    check.style.boxShadow = '0 0 0 20px rgba(155,189,212,0)';
+    check.style.transition = 'transform .4s cubic-bezier(.175,.885,.32,1.275), box-shadow .6s ease';
+  }));
+
+  // Ripple rings from circle
+  [0, 150, 300].forEach((delay, i) => {
+    const ring = document.createElement('div');
+    const d = r * 2;
+    ring.style.cssText = `
+      position:fixed;left:${cx}px;top:${cy}px;
+      width:${d}px;height:${d}px;border-radius:50%;
+      border:${2 - i * 0.4}px solid rgba(155,189,212,${0.8 - i*0.2});
+      transform:translate(-50%,-50%) scale(1);
+      pointer-events:none;z-index:9997;opacity:1;
+      transition:transform .7s cubic-bezier(.2,.8,.2,1) ${delay}ms, opacity .5s ease ${delay+250}ms;
+    `;
+    document.body.appendChild(ring);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      ring.style.transform = `translate(-50%,-50%) scale(${2.2 + i * 0.3})`;
+      ring.style.opacity = '0';
+    }));
+    setTimeout(() => ring.remove(), delay + 900);
+  });
+
+  // Fade out check
+  setTimeout(() => {
+    check.style.transition = 'transform .3s ease, opacity .3s ease';
+    check.style.opacity = '0';
+    check.style.transform = 'translate(-50%,-50%) scale(0.7)';
+    setTimeout(() => check.remove(), 350);
+  }, 1300);
+}
+
+function applyPhase() {
+  tTotal=PH[tPhase].d; tSecs=tTotal;
+  document.getElementById('t-lbl').textContent = PH[tPhase].l;
+  document.getElementById('t-lbl').style.color = tPhase === 1 ? 'var(--warning)' : 'var(--serenity-dark)';
+  document.getElementById('t-sub').textContent = PH[tPhase].s;
+  document.getElementById('t-arc').style.stroke = tPhase === 0 ? 'var(--serenity-deep)' : 'var(--warning)';
+  const pp = document.getElementById('btn-pp');
+  document.getElementById('pp-ico').innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
+  pp.setAttribute('aria-pressed','false'); pp.setAttribute('aria-label','Reproducir temporizador');
+  document.getElementById('session-info').textContent = tPhase===1 ? `Break · 5 min` : `Sesión ${tCycle+1} de 4 · Descanso: 5 min`;
+  document.getElementById('t-task').textContent = tPhase===1 ? 'Break' : 'Sesión de trabajo';
+  const msg = tPhase===1 ? '¡Sesión completada! Empieza tu descanso de 5 minutos.' : 'Descanso terminado. Nueva sesión de enfoque.';
+  announce(msg); showToast(msg, false);
+  for (let i=0;i<4;i++) {
+    const d=document.getElementById('c'+i);
+    d.className='cyc-dot'+(i<tCycle?' done':i===tCycle?' cur':'');
+  }
+  updTimer();
+}
+
+function nextPhase() {
+  clearInterval(tInt); tRun=false;
+  const wasWork = tPhase === 0;
+  tPhase=(tPhase+1)%2;
+  if (tPhase===0) tCycle=Math.min(tCycle+1,4);
+
+  if (wasWork) {
+    launchCelebration();
+    setTimeout(() => applyPhase(), 1600); // wait for animation
+  } else {
+    applyPhase();
+  }
+}
+
+function skipPhase() { clearInterval(tInt); tRun=false; nextPhase(); }
+
+function resetTimer() {
+  clearInterval(tInt); tRun=false; tPhase=0; tTotal=1500; tSecs=1500; tCycle=0;
+  const pp=document.getElementById('btn-pp');
+  document.getElementById('pp-ico').innerHTML='<polygon points="5 3 19 12 5 21 5 3"/>';
+  pp.setAttribute('aria-pressed','false'); pp.setAttribute('aria-label','Reproducir temporizador');
+  document.getElementById('t-lbl').textContent='Focus'; document.getElementById('t-lbl').style.color='var(--serenity-dark)';
+  document.getElementById('t-sub').textContent='Enfócate en tu tarea';
+  document.getElementById('t-arc').style.stroke='var(--serenity-deep)';
+  document.getElementById('session-info').textContent='Sesión 1 de 4 · Descanso: 5 min';
+  for(let i=0;i<4;i++) document.getElementById('c'+i).className='cyc-dot'+(i===0?' cur':'');
+  updTimer();
+}
+
+function tryLeave() {
+  if (tRun) showOv('ov-focus');
+  else goTo('sessions');
+}
+
+function leaveTimer() {
+  clearInterval(tInt); tRun=false; resetTimer(); closeOv('ov-focus'); goTo('sessions');
+}
+
+/* ═══════════════════════════════════════════════════════
+   INICIO: SPLASH → SLIDES
+══════════════════════════════════════════════════════ */
+updTimer();
+setTimeout(() => goTo('slides'), 3000);
+</script>
+</div><!-- /app -->
+</body>
+</html>
